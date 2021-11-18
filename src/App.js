@@ -1,11 +1,13 @@
 import "./App.css";
-import Home from "./pages/Home";
+import SurahList from "./pages/SurahList";
 import { Routes, Route } from "react-router-dom";
+import SurahRead from "./pages/SurahRead";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
+      <Route path="/" element={<SurahList />} />
+      <Route path="/baca/:no" element={<SurahRead />} />
       {/* <Route exact path="/blog" component={Blog} />
       <Route path="/blog/:slug" component={BlogPost} />
       <Route path="/project" component={Projects} />
