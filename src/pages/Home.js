@@ -1,6 +1,38 @@
-import React from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
 
 export default function Home() {
+  const [loading, setLoading] = useState(false);
+  const [surahList, setSurahList] = useState([]);
+
+  const getSurahList = async () => {
+    setLoading(true);
+    await axios
+      .get(`https://equran.id/api/surat`)
+      .then(async (res) => {
+        console.log("works");
+        setSurahList(res.data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    getSurahList();
+  }, []);
+
+  const RawHTML = ({ children, className = "" }) => (
+    <div
+      className={className}
+      dangerouslySetInnerHTML={{
+        __html:
+          children.replace(/\n/g, "<br />").substring(0, 250) + " ..........",
+      }}
+    />
+  );
+
   return (
     <section className="max-w-12xl px-4 sm:px-6 lg:px-24 py-12 bg-gray-100">
       <div className="w-full text-center pb-8">
@@ -21,50 +53,40 @@ export default function Home() {
           Baca Al-Qur'an Secara Online dan Mudah
         </p>
       </div>
-      <div
-        className="w-full grid grid-cols-1 md:grid-cols-2 gap-6"
-        onClick={() => alert("OKOK")}
-      >
-        {[1, 2, 3, 4, 5].map((item, index) => {
-          return (
-            <div
-              className="bg-white rounded-lg p-6 cursor-pointer hover:bg-blue-50"
-              key={index}
-            >
-              <div className="flex items-center space-x-6 mb-4">
-                <div className="h-20 w-20  rounded-full bg-gray-100 vertical-text-center text-center place-items-center flex justify-center">
-                  <h1 className="text-3xl text-gray-800 uppercase tracking-wide text-center">
-                    {item}
-                  </h1>
+      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6">
+        {surahList.length === 0 ? (
+          <p>Memuat</p>
+        ) : (
+          surahList.map((item, index) => {
+            return (
+              <>
+                <div
+                  key={index}
+                  class="py-4 px-8 bg-white shadow-lg rounded-lg my-10 hover:bg-blue-50"
+                >
+                  <div class="flex justify-center md:justify-end -mt-16">
+                    <div className="h-20 w-20  rounded-full bg-gray-100 vertical-text-center text-center place-items-center flex justify-center shadow">
+                      <h1 className="text-3xl text-gray-800 uppercase tracking-wide text-center">
+                        {item.nomor}
+                      </h1>
+                    </div>
+                  </div>
+                  <div>
+                    <h2 class="text-gray-800 text-3xl font-semibold">
+                      {item.nama}
+                    </h2>
+                    <p class="mt-2 text-gray-600">{item.nama_latin}</p>
+                  </div>
+                  <div class="flex justify-end mt-4">
+                    <a href="#" class="text-xl font-medium text-indigo-500">
+                      {item.arti}
+                    </a>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xl text-gray-700 font-normal mb-1">
-                    الفاتحة
-                  </p>
-                  <p className="text-base text-blue-600 font-normal">
-                    Al-Fatihah
-                  </p>
-                </div>
-              </div>
-              <div>
-                <p className="text-gray-400 leading-loose font-normal text-base">
-                  <i>Al Faatihah</i> (Pembukaan) yang diturunkan di Mekah dan
-                  terdiri dari 7 ayat adalah surat yang pertama-tama diturunkan
-                  dengan lengkap diantara surat-surat yang ada dalam Al Quran
-                  dan termasuk golongan surat Makkiyyah. Surat ini disebut{" "}
-                  <i>Al Faatihah</i> (Pembukaan), karena dengan surat inilah
-                  dibuka dan dimulainya Al Quran. Dinamakan <i>Ummul Quran</i>{" "}
-                  (induk Al Quran) atau <i>Ummul Kitaab</i> (induk Al Kitaab)
-                  karena dia merupakan induk dari semua isi Al Quran, dan karena
-                  itu diwajibkan membacanya pada tiap-tiap sembahyang.
-                  <br /> Dinamakan pula <i>As Sab'ul matsaany</i> (tujuh yang
-                  berulang-ulang) karena ayatnya tujuh dan dibaca berulang-ulang
-                  dalam sholat.
-                </p>
-              </div>
-            </div>
-          );
-        })}
+              </>
+            );
+          })
+        )}
       </div>
     </section>
   );
