@@ -5,6 +5,7 @@ import { convertToArabicNumbers } from "../helpers";
 export default function SurahList() {
   const [loading, setLoading] = useState(false);
   const [surahList, setSurahList] = useState([]);
+  const [surahAll, setSurahAll] = useState([]);
 
   const getSurahList = async () => {
     setLoading(true);
@@ -13,6 +14,7 @@ export default function SurahList() {
       .then(async (res) => {
         console.log("works");
         setSurahList(res.data);
+        setSurahAll(res.data);
       })
       .catch((err) => {
         console.log(err);
@@ -23,6 +25,18 @@ export default function SurahList() {
   useEffect(() => {
     getSurahList();
   }, []);
+
+  const searchSurah = (event) => {
+    let updatedList = surahAll;
+    updatedList = updatedList.filter(function (item) {
+      return (
+        item.nama_latin
+          .toLowerCase()
+          .search(event.target.value.toLowerCase()) !== -1
+      );
+    });
+    setSurahList(updatedList);
+  };
 
   return (
     <section className="max-w-12xl px-4 sm:px-6 lg:px-24 py-12 bg-gray-100">
@@ -45,6 +59,18 @@ export default function SurahList() {
           Indonesia
         </p>
       </div>
+      {/* SEARCH */}
+      <div className="mb-8 w-full grid grid-cols-1 md:grid-cols-3 gap-6 w-full ">
+        <div></div>
+        <input
+          onChange={searchSurah}
+          type="search"
+          className="bg-purple-white shadow self-auto rounded border-0 p-3"
+          placeholder="Cari berdasarkan nama Surah..."
+        />
+        <div></div>
+      </div>
+      {/* SEARCH */}
       <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6">
         {loading ? (
           <>
@@ -83,6 +109,7 @@ export default function SurahList() {
             );
           })
         )}
+        {surahList.length === 0 && "Data tidak ditemukan"}
       </div>
     </section>
   );
