@@ -25,9 +25,12 @@ export default function SurahRead() {
     setLoading(false);
   };
 
-  useEffect(() => {
-    getSurahData();
-  }, []);
+  useEffect(async () => {
+    await getSurahData();
+    document.title = surahData.nama_latin
+      ? surahData.nama_latin
+      : "Al-Qur'an Indonesia";
+  }, [surahData]);
 
   return (
     <div className="w-full h-full flex items-center justify-center bg-gray-50 lg:px-16 py-20">
