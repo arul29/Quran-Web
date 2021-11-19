@@ -1,5 +1,5 @@
-import axios from "axios";
 import React, { useEffect } from "react";
+import axios from "axios";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { convertToArabicNumbers, RawHTML } from "../helpers";
@@ -51,7 +51,7 @@ export default function SurahRead() {
           </div>
         </div>
       ) : (
-        <div className="relative  h-auto bg-blue-100 rounded-md pt-24 pb-8 lg:px-36 px-8 shadow-md hover:shadow-lg transition flex flex-col">
+        <div className="relative  h-auto bg-blue-50 rounded-md pt-24 pb-8 lg:px-36 px-8 shadow-md hover:shadow-lg transition flex flex-col">
           <div className="absolute rounded-full bg-gray-100 w-28 h-28  z-10 -top-8 shadow-sm flex place-items-center justify-center self-end">
             <div className="h-20 w-20  rounded-full bg-gray-100 vertical-text-center text-center place-items-center flex justify-center ">
               <h1 className="text-3xl text-gray-800 uppercase tracking-wide text-center">
