@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
+import { convertToArabicNumbers } from "../helpers";
 
 export default function SurahList() {
   const [loading, setLoading] = useState(false);
@@ -23,14 +24,6 @@ export default function SurahList() {
   useEffect(() => {
     getSurahList();
   }, []);
-
-  const convertToArabicNumbers = (num) => {
-    const arabicNumbers =
-      "\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669";
-    return new String(num).replace(/[0123456789]/g, (d) => {
-      return arabicNumbers[d];
-    });
-  };
 
   return (
     <section className="max-w-12xl px-4 sm:px-6 lg:px-24 py-12 bg-gray-100">
@@ -67,7 +60,7 @@ export default function SurahList() {
                 key={index}
                 className="py-4 px-8 bg-white shadow-lg rounded-lg my-10 hover:bg-blue-50"
               >
-                <Link to={`/baca/${item.nomor}`}>
+                <a href={`/baca/${item.nomor}`}>
                   <div className="flex justify-center md:justify-end -mt-16">
                     <div className="h-20 w-20  rounded-full bg-gray-100 vertical-text-center text-center place-items-center flex justify-center shadow">
                       <h1 className="text-3xl text-gray-800 uppercase tracking-wide text-center">
@@ -86,7 +79,7 @@ export default function SurahList() {
                       {item.arti}
                     </p>
                   </div>
-                </Link>
+                </a>
               </div>
             );
           })
