@@ -15,7 +15,6 @@ export default function SurahRead() {
     await axios
       .get(`https://equran.id/api/surat/${no}`)
       .then(async (res) => {
-        console.log(res.data.ayat);
         setSurahData(res.data);
         setSurahRead(res.data.ayat);
       })
@@ -25,11 +24,14 @@ export default function SurahRead() {
     setLoading(false);
   };
 
-  useEffect(async () => {
-    await getSurahData();
-    document.title = surahData.nama_latin
-      ? surahData.nama_latin
-      : "Al-Qur'an Indonesia";
+  useEffect(() => {
+    async function fetchData() {
+      await getSurahData();
+      document.title = surahData.nama_latin
+        ? surahData.nama_latin
+        : "Al-Qur'an Indonesia";
+    }
+    fetchData();
   }, [surahData]);
 
   return (
@@ -39,7 +41,7 @@ export default function SurahRead() {
           <div className="flex justify-center items-center space-x-1 text-sm text-gray-700">
             <svg
               fill="none"
-              className="w-6 h-6 animate-spin"
+              className="w-12 h-12 animate-spin"
               viewBox="0 0 32 32"
               xmlns="http://www.w3.org/2000/svg"
             >
@@ -50,7 +52,9 @@ export default function SurahRead() {
                 fillRule="evenodd"
               />
             </svg>
-            <div>Memuat ...</div>
+            <div>
+              <label className="text-2xl">Memuat ...</label>
+            </div>
           </div>
         </div>
       ) : (
@@ -67,17 +71,17 @@ export default function SurahRead() {
           </label>
           {surahRead.map((item, index) => {
             return (
-              <>
+              <div key={index}>
                 <p className="text-right text-3xl text-gray-500 mt-2 leading-relaxed">
                   {item.ar} ({convertToArabicNumbers(item.nomor)})
                 </p>
-                <p className="text-left text-gray-500 mt-2 leading-relaxed">
+                <label className="text-left text-gray-500 mt-2 leading-relaxed">
                   <RawHTML>{item.tr}</RawHTML>
-                </p>
+                </label>
                 <p className="text-left text-gray-500 mt-2 leading-relaxed">
                   <i>{item.idn}</i>
                 </p>
-              </>
+              </div>
             );
           })}
         </div>
