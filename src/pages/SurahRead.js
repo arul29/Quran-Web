@@ -35,7 +35,7 @@ export default function SurahRead() {
   }, [surahData]);
 
   return (
-    <div className="w-full h-full flex items-center justify-center bg-gray-50 lg:px-16 py-20">
+    <div className="w-full h-full flex items-center justify-center bg-blue-50 lg:px-16 py-20">
       {loading ? (
         <div className="flex items-center justify-center w-full h-screen -mt-36">
           <div className="flex justify-center items-center space-x-1 text-sm text-gray-700">
@@ -58,20 +58,46 @@ export default function SurahRead() {
           </div>
         </div>
       ) : (
-        <div className="relative  h-auto bg-blue-50 rounded-md pt-24 pb-8 lg:px-36 px-8 shadow-md hover:shadow-lg transition flex flex-col">
-          <div className="absolute rounded-full bg-blue-100 w-28 h-28  z-10 -top-8 shadow-sm flex place-items-center justify-center self-end">
+        <div
+          className="relative  h-auto bg-blue-50 rounded-md pt-24 pb-8 lg:px-36 px-8 
+        transition flex flex-col "
+        >
+          {/* shadow-md hover:shadow-lg  */}
+          <div className="absolute rounded-full bg-blue-100 w-28 h-28  z-10 -top-8 shadow-sm flex place-items-center justify-center self-end lg:mr-48">
             <div className="h-20 w-20  rounded-full bg-blue-100 vertical-text-center text-center place-items-center flex justify-center ">
               <h1 className="text-3xl text-gray-800 uppercase tracking-wide text-center">
                 {surahData.nama}
               </h1>
             </div>
           </div>
-          <label className="font-bold text-gray-800 text-lg">
+          <label className="font-bold text-gray-800 text-lg lg:px-48">
             {surahData.nama_latin}
           </label>
           {surahRead.map((item, index) => {
             return (
-              <div key={index}>
+              <div
+                key={index}
+                className={`w-screen lg:px-48 ${
+                  index % 2 === 0 ? "bg-yellow-50" : "bg-white"
+                }`}
+              >
+                {/* DROPDOWN SAVE LAST READ */}
+                {/* <div className="group inline-block relative">
+                  <button className="bg-gray-100 text-gray-700 font-semibold px-2 rounded inline-flex items-center">
+                    <span className="mr-1">...</span>
+                  </button>
+                  <ul className="absolute hidden text-gray-700 pt-1 group-hover:block">
+                    <li className>
+                      <a
+                        className="rounded-t bg-gray-200 hover:bg-gray-400 py-2 px-4 block whitespace-no-wrap"
+                        href="#"
+                      >
+                        One
+                      </a>
+                    </li>
+                  </ul>
+                </div> */}
+                {/* DROPDOWN SAVE LAST READ */}
                 <p className="text-right text-3xl text-gray-500 mt-2 leading-relaxed">
                   {item.ar} ({convertToArabicNumbers(item.nomor)})
                 </p>
