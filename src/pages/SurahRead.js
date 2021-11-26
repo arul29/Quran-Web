@@ -77,7 +77,7 @@ export default function SurahRead() {
             return (
               <div
                 key={index}
-                className={`w-screen lg:px-48 ${
+                className={`w-screen lg:px-48 px-4 ${
                   index % 2 === 0 ? "bg-yellow-50" : "bg-white"
                 }`}
               >
