@@ -24,13 +24,23 @@ export default function SurahRead() {
     setLoading(false);
   };
 
+  // useEffect(() => {
+  //   async function fetchData() {
+  //     await getSurahData();
+  //     document.title = surahData.nama_latin
+  //       ? surahData.nama_latin
+  //       : "Al-Qur'an Indonesia";
+  //   }
+  //   fetchData();
+  // }, [surahData]);
+
   useEffect(() => {
-    async function fetchData() {
+    const fetchData = async () => {
       await getSurahData();
       document.title = surahData.nama_latin
         ? surahData.nama_latin
         : "Al-Qur'an Indonesia";
-    }
+    };
     fetchData();
   }, [surahData]);
 

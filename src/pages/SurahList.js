@@ -7,13 +7,13 @@ export default function SurahList() {
   const [surahList, setSurahList] = useState([]);
   const [surahAll, setSurahAll] = useState([]);
   const [bookmark, setBookmark] = useState([]);
+  const [viewBookmark, setViewBookmark] = useState(false);
 
   const getSurahList = async () => {
     setLoading(true);
     await axios
       .get(`https://equran.id/api/surat`)
       .then(async (res) => {
-        console.log("works");
         setSurahList(res.data);
         setSurahAll(res.data);
       })
@@ -24,7 +24,7 @@ export default function SurahList() {
   };
 
   const searchSurah = (event) => {
-    let updatedList = surahAll;
+    let updatedList = viewBookmark ? bookmark : surahAll;
     updatedList = updatedList.filter(function (item) {
       return (
         item.nama_latin
@@ -37,7 +37,6 @@ export default function SurahList() {
 
   const getBookmark = () => {
     const bookmark = localStorage.getItem("bookmark");
-    console.log(JSON.parse(bookmark));
     if (bookmark) {
       setBookmark(JSON.parse(bookmark));
     } else {
@@ -111,6 +110,20 @@ export default function SurahList() {
         <a onClick={() => alert("Dalam pengembangan")}>Lihat Bookmark</a>
       </div> */}
       {/* SEARCH */}
+      {/* BOOKMARK */}
+      <div className="w-full text-center pb-8">
+        <button
+          onClick={() => {
+            setViewBookmark(!viewBookmark);
+            viewBookmark ? setSurahList(surahAll) : setSurahList(bookmark);
+          }}
+        >
+          <p className="text-gray-400 font-normal text-base">
+            {viewBookmark ? "Lihat Semua" : "Lihat Bookmark"}
+          </p>
+        </button>
+      </div>
+      {/* BOOKMARK */}
       <div className="w-full grid grid-cols-1 md:grid-cols-3 sm:grid-cols-2 gap-6">
         {loading ? (
           <>
@@ -145,29 +158,32 @@ export default function SurahList() {
                 </div>
                 {/* BOOKMARK BUTTON */}
 
-                <div
-                  className="flex justify-between mt-4"
-                  onClick={() => {
-                    if (isBookmark(item.nomor)) removeBookmark(item.nomor);
-                    else addBookmark(item);
-                  }}
-                >
-                  <svg
-                    fill={`${isBookmark(item.nomor) ? "#000" : "#eee"} `}
-                    width="24"
-                    height="24"
-                    version="1.1"
-                    id="Capa_1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    xmlnsXlink="http://www.w3.org/1999/xlink"
-                    x="0px"
-                    y="0px"
-                    viewBox="0 0 321.188 321.188"
-                    style={{ enableBackground: "new 0 0 321.188 321.188" }}
-                    xmlSpace="preserve"
-                  >
-                    <polygon points="61.129,0 61.129,321.188 160.585,250.657 260.059,321.188 260.059,0 " />
-                  </svg>
+                <div className="flex justify-between mt-4">
+                  {!viewBookmark && (
+                    <button
+                      onClick={() => {
+                        if (isBookmark(item.nomor)) removeBookmark(item.nomor);
+                        else addBookmark(item);
+                      }}
+                    >
+                      <svg
+                        fill={`${isBookmark(item.nomor) ? "#000" : "#eee"} `}
+                        width="24"
+                        height="24"
+                        version="1.1"
+                        id="Capa_1"
+                        xmlns="http://www.w3.org/2000/svg"
+                        xmlnsXlink="http://www.w3.org/1999/xlink"
+                        x="0px"
+                        y="0px"
+                        viewBox="0 0 321.188 321.188"
+                        style={{ enableBackground: "new 0 0 321.188 321.188" }}
+                        xmlSpace="preserve"
+                      >
+                        <polygon points="61.129,0 61.129,321.188 160.585,250.657 260.059,321.188 260.059,0 " />
+                      </svg>
+                    </button>
+                  )}
                   <p className="text-xl font-medium text-blue-300">
                     {item.arti}
                   </p>
