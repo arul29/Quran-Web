@@ -65,17 +65,16 @@
       measurementId: "G-GCZK5CK4GD",
     };
 
-    // if (
-    //   window.location.host === "mydomain.com" ||
-    //   window.location.host === "www.mydomain.com"
-    // ) {
-    //   if (document.cookie.indexOf("COOKIENAME=COOKIEVALUE") === -1) {
-    //     // Insert Analytics Code Here
-    //   }
-    // }
-
     // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const analytics = getAnalytics(app);
+    if (
+      window.location.host === "darul.id" ||
+      window.location.host === "quran.darul.id"
+    ) {
+      if (document.cookie.indexOf("COOKIENAME=COOKIEVALUE") === -1) {
+        // Insert Analytics Code Here
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+      }
+    }
   </script>
 </html>
