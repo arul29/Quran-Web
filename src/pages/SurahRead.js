@@ -8,12 +8,13 @@ import {
   FiShare2,
   FiChevronLeft,
   FiChevronRight,
-  FiBookmark, // Changed from BsBookmark for consistency if needed, but BsBookmark is fine too.
-  FiVolume2, // Changed from BsFillVolumeUpFill for consistency if needed.
+  FiBookmark, // Outline bookmark icon
+  FiVolume2,
 } from "react-icons/fi";
-import { BsBookmarkFill } from "react-icons/bs"; // For filled bookmark icon
+import { BsBookmarkFill } from "react-icons/bs"; // Filled bookmark icon
 
 import { convertToArabicNumbers, RawHTML } from "../helpers";
+import { FaBoxOpen } from "react-icons/fa";
 
 export default function SurahRead() {
   const { no } = useParams();
@@ -43,7 +44,7 @@ export default function SurahRead() {
     }
   };
 
-  // Bookmark functions (reused from SurahList)
+  // Bookmark functions
   const getBookmark = () => {
     const bookmark = localStorage.getItem("bookmark");
     if (bookmark) {
@@ -101,6 +102,24 @@ export default function SurahRead() {
     }
   };
 
+  // Bookmark toggle for the entire surah
+  const toggleSurahBookmark = () => {
+    if (!surahData || !surahData.nomor) return; // Ensure surahData is available
+
+    if (isBookmark(surahData.nomor)) {
+      removeBookmark(surahData.nomor);
+    } else {
+      addBookmark({
+        nomor: surahData.nomor,
+        nama_latin: surahData.nama_latin,
+        arti: surahData.arti,
+        jumlah_ayat: surahData.jumlah_ayat,
+        tempat_turun: surahData.tempat_turun,
+        link: `/baca/${surahData.nomor}`, // Link to this surah
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
       {/* Header Section (adapted from SurahList for consistency) */}
@@ -151,6 +170,28 @@ export default function SurahRead() {
 
           <div className="flex space-x-2">
             <button
+              onClick={toggleSurahBookmark} // Bookmark button for the entire surah
+              className={`p-2 rounded-full ${
+                isScrolled ? "bg-white shadow-md" : "bg-white/30"
+              } hover:bg-white/50 transition duration-200`}
+              aria-label="Bookmark Surah"
+              disabled={loading} // Disable while loading surah data
+            >
+              {surahData.nomor && isBookmark(surahData.nomor) ? (
+                <BsBookmarkFill
+                  className={`h-6 w-6 ${
+                    isScrolled ? "text-emerald-600" : "text-white"
+                  }`}
+                />
+              ) : (
+                <FiBookmark
+                  className={`h-6 w-6 ${
+                    isScrolled ? "text-emerald-600" : "text-white"
+                  }`}
+                />
+              )}
+            </button>
+            <button
               className={`p-2 rounded-full ${
                 isScrolled ? "bg-white shadow-md" : "bg-white/30"
               } hover:bg-white/50 transition duration-200`}
@@ -192,19 +233,7 @@ export default function SurahRead() {
           // No Data (from SurahList)
           <div className="col-span-full text-center py-16">
             <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-              <svg
-                className="w-12 h-12 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.291-1.007-5.824-2.709M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
-                />
-              </svg>
+              <FaBoxOpen className="w-12 h-12 text-gray-400" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-2">
               Tidak ada data ditemukan
@@ -256,33 +285,8 @@ export default function SurahRead() {
                         {convertToArabicNumbers(item.nomor)}
                       </div>
 
-                      <button
-                        onClick={() => {
-                          // Pass surahData to addBookmark to store full surah info
-                          if (isBookmark(item.nomor_ayat))
-                            // Assuming ayat number is unique for bookmark
-                            removeBookmark(item.nomor_ayat);
-                          else
-                            addBookmark({
-                              nomor: item.nomor_ayat, // Use ayat number for individual verse bookmark
-                              nama_latin: `${surahData.nama_latin} - Ayat ${item.nomor_ayat}`, // Create a descriptive name
-                              arti: surahData.arti,
-                              jumlah_ayat: item.nomor, // Storing verse number for display purposes in SurahList
-                              tempat_turun: surahData.tempat_turun,
-                              // You might want to store actual verse content or a link
-                              link: `/baca/${surahData.nomor}#ayat-${item.nomor_ayat}`,
-                            });
-                        }}
-                        className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
-                      >
-                        {isBookmark(item.nomor_ayat) ? (
-                          <BsBookmarkFill className="w-6 h-6 text-emerald-600" />
-                        ) : (
-                          <FiBookmark className="w-6 h-6 text-gray-400" />
-                        )}
-                      </button>
+                      {/* Bookmark button per ayat removed */}
                     </div>
-
                     <p className="text-right text-3xl font-arabic leading-loose text-gray-800 mb-4">
                       {item.ar}
                     </p>
