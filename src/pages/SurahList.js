@@ -224,7 +224,7 @@ export default function SurahList() {
                   </div>
 
                   <a href={`/baca/${item.nomor}`} className="block">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors duration-200">
+                    <h3 className="text-2xl font-arabic font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors duration-200">
                       {item.nama}
                     </h3>
                     <p className="text-lg font-medium text-gray-700 mb-2">

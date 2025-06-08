@@ -1,3 +1,10 @@
+@import url("https://fonts.googleapis.com/css2?family=Amiri&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Anda tidak perlu @font-face lagi jika menggunakan @import atau <link> */
+.font-arabic {
+  font-family: "Amiri", "Traditional Arabic", "Times New Roman", serif;
+}
