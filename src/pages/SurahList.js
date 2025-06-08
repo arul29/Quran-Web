@@ -194,7 +194,7 @@ export default function SurahList() {
                   <div className="flex items-start justify-between mb-4">
                     <a
                       href={`/baca/${item.nomor}`}
-                      className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-full flex items-center justify-center text-black font-bold text-xl shadow-lg group-hover:scale-105 transition-transform duration-200"
+                      className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:scale-105 transition-transform duration-200"
                     >
                       {convertToArabicNumbers(item.nomor)}
                     </a>
