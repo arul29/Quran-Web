@@ -1,10 +1,12 @@
+// tailwind.config.js
 module.exports = {
-  purge: ["./src/**/*.{js,jsx,ts,tsx}", "./public/index.html"],
-  darkMode: false, // or 'media' or 'class'
+  content: [
+    // 'purge' diganti menjadi 'content'
+    "./src/**/*.{js,jsx,ts,tsx}",
+    "./public/index.html",
+  ],
+  darkMode: "media", // atau 'class' tergantung kebutuhan Anda
   theme: {
-    extend: {},
-  },
-  variants: {
     extend: {},
   },
   plugins: [],
