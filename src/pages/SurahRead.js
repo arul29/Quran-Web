@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react"; // Add useCallback
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -11,7 +11,7 @@ import {
   FiBookmark, // Outline bookmark icon
   FiVolume2, // Play icon
   FiPause, // Pause icon
-} from "react-icons/fi"; // Tambahkan FiPause
+} from "react-icons/fi";
 import { BsBookmarkFill } from "react-icons/bs"; // Filled bookmark icon
 
 import { convertToArabicNumbers, RawHTML } from "../helpers";
@@ -23,9 +23,9 @@ export default function SurahRead() {
   const [loading, setLoading] = useState(true);
   const [surahData, setSurahData] = useState({});
   const [surahRead, setSurahRead] = useState([]);
-  const [activeVerse, setActiveVerse] = useState(null);
+  const [activeVerse, setActiveVerse] = useState(null); // Keep for potential future use
   const [isScrolled, setIsScrolled] = useState(false);
-  const [bookmark, setBookmark] = useState([]); // State for bookmark
+  const [bookmark, setBookmark] = useState([]);
 
   // State untuk audio
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -33,7 +33,8 @@ export default function SurahRead() {
 
   const headerRef = useRef(null);
 
-  const getSurahData = async () => {
+  // Wrap getSurahData in useCallback to make it a stable function
+  const getSurahData = useCallback(async () => {
     try {
       setLoading(true);
       const res = await axios.get(`https://equran.id/api/surat/${no}`);
@@ -42,26 +43,27 @@ export default function SurahRead() {
       document.title = `${res.data.nama_latin} - Al-Qur'an`;
 
       // Inisialisasi Audio object setelah data surah didapatkan
-      if (res.data.audio && audioRef.current === null) {
+      // Check if audioRef.current exists before updating src
+      if (audioRef.current === null) {
         audioRef.current = new Audio(res.data.audio);
         audioRef.current.onended = () => {
-          setIsPlayingAudio(false); // Reset status ketika audio selesai
+          setIsPlayingAudio(false);
         };
         audioRef.current.onpause = () => {
-          setIsPlayingAudio(false); // Reset status ketika audio dijeda
+          setIsPlayingAudio(false);
         };
-      } else if (res.data.audio && audioRef.current) {
-        // Jika surah berubah, update sumber audio
+      } else if (res.data.audio) {
+        // If surah changes, update audio source
         audioRef.current.src = res.data.audio;
-        audioRef.current.load(); // Memuat ulang audio
-        setIsPlayingAudio(false); // Pastikan status play false saat surah baru dimuat
+        audioRef.current.load();
+        setIsPlayingAudio(false);
       }
     } catch (err) {
       console.error("Failed to fetch surah data:", err);
       document.title = "Al-Qur'an Indonesia";
       setSurahData({});
       setSurahRead([]);
-      // Pastikan audio dihentikan jika ada error
+      // Ensure audio is stopped if there's an error
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null; // Reset audio object
@@ -69,7 +71,7 @@ export default function SurahRead() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [no]); // `no` is a dependency for `getSurahData`
 
   // Bookmark functions
   const getBookmark = () => {
@@ -103,12 +105,15 @@ export default function SurahRead() {
   };
 
   const isBookmark = (item_id) => {
-    return bookmark.filter((bookmark) => item_id === bookmark.nomor).length > 0;
+    return (
+      bookmark.filter((bookmarkItem) => item_id === bookmarkItem.nomor).length >
+      0
+    );
   };
 
   useEffect(() => {
     getBookmark(); // Get bookmarks on component mount
-    getSurahData();
+    getSurahData(); // Now getSurahData is stable, so no warning
 
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -116,7 +121,7 @@ export default function SurahRead() {
 
     window.addEventListener("scroll", handleScroll);
 
-    // Cleanup function untuk menghentikan audio saat komponen di-unmount
+    // Cleanup function to stop audio when component unmounts
     return () => {
       window.removeEventListener("scroll", handleScroll);
       if (audioRef.current) {
@@ -124,14 +129,16 @@ export default function SurahRead() {
         audioRef.current = null;
       }
     };
-  }, [no]); // Dependensi `no` agar data dan audio surah baru dimuat saat ganti surah
+  }, [no, getSurahData]); // Depend on `no` and `getSurahData`
 
-  const handleVerseClick = (index) => {
-    setActiveVerse(activeVerse === index ? null : index);
-  };
+  // Removed handleVerseClick as it's not used in your current JSX
+  // If you want to use it, you'd add onClick={() => handleVerseClick(index)} to a verse element.
+  // const handleVerseClick = (index) => {
+  //   setActiveVerse(activeVerse === index ? null : index);
+  // };
 
   const navigateSurah = (direction) => {
-    // Hentikan audio saat navigasi
+    // Stop audio when navigating
     if (audioRef.current) {
       audioRef.current.pause();
       setIsPlayingAudio(false);
@@ -169,7 +176,7 @@ export default function SurahRead() {
     }
 
     if (!audioRef.current) {
-      // Inisialisasi Audio object jika belum ada
+      // Initialize Audio object if it doesn't exist
       audioRef.current = new Audio(surahData.audio);
       audioRef.current.onended = () => {
         setIsPlayingAudio(false);
@@ -245,12 +252,12 @@ export default function SurahRead() {
 
           <div className="flex space-x-2">
             <button
-              onClick={toggleSurahBookmark} // Bookmark button for the entire surah
+              onClick={toggleSurahBookmark}
               className={`p-2 rounded-full ${
                 isScrolled ? "bg-white shadow-md" : "bg-white/30"
               } hover:bg-white/50 transition duration-200`}
               aria-label="Bookmark Surah"
-              disabled={loading} // Disable while loading surah data
+              disabled={loading}
             >
               {surahData.nomor && isBookmark(surahData.nomor) ? (
                 <BsBookmarkFill
@@ -323,8 +330,7 @@ export default function SurahRead() {
             <div className="bg-white rounded-2xl shadow-sm p-6 mb-8 text-center border border-gray-100">
               <div className="flex justify-center mb-4">
                 <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                  <h1 className="text-4xl font-arabic">{surahData.nama}</h1>{" "}
-                  {/* Arabic name */}
+                  <h1 className="text-4xl font-arabic">{surahData.nama}</h1>
                 </div>
               </div>
 
@@ -348,7 +354,7 @@ export default function SurahRead() {
                 aria-label={
                   isPlayingAudio ? "Jeda Audio Surah" : "Dengarkan Surah"
                 }
-                disabled={loading || !surahData.audio} // Disable if loading or no audio URL
+                disabled={loading || !surahData.audio}
               >
                 {isPlayingAudio ? (
                   <FiPause className="h-6 w-6 mr-3" />
@@ -390,14 +396,6 @@ export default function SurahRead() {
                     </div>
 
                     <div className="flex justify-end space-x-3 mt-4 border-t border-gray-100 pt-4">
-                      {/* Individual verse audio button (removed as requested) */}
-                      {/* <button
-                        className="px-4 py-2 rounded-full bg-emerald-50 hover:bg-emerald-100 transition duration-200 flex items-center text-emerald-700 font-medium"
-                        aria-label="Putar audio"
-                      >
-                        <FiVolume2 className="h-5 w-5 mr-2" />
-                        Dengarkan
-                      </button> */}
                       <button
                         className="px-4 py-2 rounded-full bg-blue-50 hover:bg-blue-100 transition duration-200 flex items-center text-blue-700 font-medium"
                         aria-label="Bagikan ayat"
