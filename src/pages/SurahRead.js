@@ -147,6 +147,7 @@ export default function SurahRead() {
     const newNo = parseInt(no) + direction;
     if (newNo >= 1 && newNo <= 114) {
       navigate(`/baca/${newNo}`);
+      window.scrollTo(0, 0);
     }
   };
 
