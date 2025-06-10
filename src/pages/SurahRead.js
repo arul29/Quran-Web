@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -9,8 +9,9 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiBookmark, // Outline bookmark icon
-  FiVolume2,
-} from "react-icons/fi";
+  FiVolume2, // Play icon
+  FiPause, // Pause icon
+} from "react-icons/fi"; // Tambahkan FiPause
 import { BsBookmarkFill } from "react-icons/bs"; // Filled bookmark icon
 
 import { convertToArabicNumbers, RawHTML } from "../helpers";
@@ -25,6 +26,11 @@ export default function SurahRead() {
   const [activeVerse, setActiveVerse] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [bookmark, setBookmark] = useState([]); // State for bookmark
+
+  // State untuk audio
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const audioRef = useRef(null); // Ref untuk elemen Audio
+
   const headerRef = useRef(null);
 
   const getSurahData = async () => {
@@ -34,11 +40,32 @@ export default function SurahRead() {
       setSurahData(res.data);
       setSurahRead(res.data.ayat);
       document.title = `${res.data.nama_latin} - Al-Qur'an`;
+
+      // Inisialisasi Audio object setelah data surah didapatkan
+      if (res.data.audio && audioRef.current === null) {
+        audioRef.current = new Audio(res.data.audio);
+        audioRef.current.onended = () => {
+          setIsPlayingAudio(false); // Reset status ketika audio selesai
+        };
+        audioRef.current.onpause = () => {
+          setIsPlayingAudio(false); // Reset status ketika audio dijeda
+        };
+      } else if (res.data.audio && audioRef.current) {
+        // Jika surah berubah, update sumber audio
+        audioRef.current.src = res.data.audio;
+        audioRef.current.load(); // Memuat ulang audio
+        setIsPlayingAudio(false); // Pastikan status play false saat surah baru dimuat
+      }
     } catch (err) {
       console.error("Failed to fetch surah data:", err);
       document.title = "Al-Qur'an Indonesia";
       setSurahData({});
       setSurahRead([]);
+      // Pastikan audio dihentikan jika ada error
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null; // Reset audio object
+      }
     } finally {
       setLoading(false);
     }
@@ -88,14 +115,28 @@ export default function SurahRead() {
     };
 
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [no]);
+
+    // Cleanup function untuk menghentikan audio saat komponen di-unmount
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [no]); // Dependensi `no` agar data dan audio surah baru dimuat saat ganti surah
 
   const handleVerseClick = (index) => {
     setActiveVerse(activeVerse === index ? null : index);
   };
 
   const navigateSurah = (direction) => {
+    // Hentikan audio saat navigasi
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPlayingAudio(false);
+    }
+
     const newNo = parseInt(no) + direction;
     if (newNo >= 1 && newNo <= 114) {
       navigate(`/baca/${newNo}`);
@@ -117,6 +158,40 @@ export default function SurahRead() {
         tempat_turun: surahData.tempat_turun,
         link: `/baca/${surahData.nomor}`, // Link to this surah
       });
+    }
+  };
+
+  // Function to play or pause entire surah audio
+  const toggleSurahAudio = async () => {
+    if (!surahData.audio) {
+      alert("Maaf, audio untuk surah ini tidak tersedia.");
+      return;
+    }
+
+    if (!audioRef.current) {
+      // Inisialisasi Audio object jika belum ada
+      audioRef.current = new Audio(surahData.audio);
+      audioRef.current.onended = () => {
+        setIsPlayingAudio(false);
+      };
+      audioRef.current.onpause = () => {
+        setIsPlayingAudio(false);
+      };
+    }
+
+    try {
+      if (isPlayingAudio) {
+        audioRef.current.pause();
+      } else {
+        await audioRef.current.play();
+      }
+      setIsPlayingAudio(!isPlayingAudio);
+    } catch (error) {
+      console.error("Error playing audio:", error);
+      alert(
+        "Gagal memutar audio. Pastikan browser Anda mengizinkan autoplay atau coba lagi."
+      );
+      setIsPlayingAudio(false);
     }
   };
 
@@ -260,11 +335,28 @@ export default function SurahRead() {
                 {surahData.arti}
               </p>
 
-              <div className="flex justify-center space-x-4 text-sm text-gray-500 mt-4">
+              <div className="flex justify-center space-x-4 text-sm text-gray-500 mt-4 mb-4">
                 <span>{surahData.jumlah_ayat} Ayat</span>
                 <span>•</span>
                 <span className="capitalize">{surahData.tempat_turun}</span>
               </div>
+
+              {/* Dengarkan button for the entire surah */}
+              <button
+                onClick={toggleSurahAudio}
+                className="px-6 py-3 rounded-full bg-emerald-100 hover:bg-emerald-200 transition duration-200 flex items-center justify-center text-emerald-800 font-semibold mx-auto"
+                aria-label={
+                  isPlayingAudio ? "Jeda Audio Surah" : "Dengarkan Surah"
+                }
+                disabled={loading || !surahData.audio} // Disable if loading or no audio URL
+              >
+                {isPlayingAudio ? (
+                  <FiPause className="h-6 w-6 mr-3" />
+                ) : (
+                  <FiVolume2 className="h-6 w-6 mr-3" />
+                )}
+                {isPlayingAudio ? "Jeda Audio Surah" : "Dengarkan Surah"}
+              </button>
             </div>
 
             {/* Verses List */}
@@ -284,8 +376,7 @@ export default function SurahRead() {
                       <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md">
                         {convertToArabicNumbers(item.nomor)}
                       </div>
-
-                      {/* Bookmark button per ayat removed */}
+                      {/* Bookmark button per ayat (was here) */}
                     </div>
                     <p className="text-right text-3xl font-arabic leading-loose text-gray-800 mb-4">
                       {item.ar}
@@ -299,13 +390,14 @@ export default function SurahRead() {
                     </div>
 
                     <div className="flex justify-end space-x-3 mt-4 border-t border-gray-100 pt-4">
-                      <button
+                      {/* Individual verse audio button (removed as requested) */}
+                      {/* <button
                         className="px-4 py-2 rounded-full bg-emerald-50 hover:bg-emerald-100 transition duration-200 flex items-center text-emerald-700 font-medium"
                         aria-label="Putar audio"
                       >
                         <FiVolume2 className="h-5 w-5 mr-2" />
                         Dengarkan
-                      </button>
+                      </button> */}
                       <button
                         className="px-4 py-2 rounded-full bg-blue-50 hover:bg-blue-100 transition duration-200 flex items-center text-blue-700 font-medium"
                         aria-label="Bagikan ayat"
