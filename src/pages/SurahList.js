@@ -13,10 +13,11 @@ export default function SurahList() {
   const getSurahList = async () => {
     setLoading(true);
     await axios
-      .get(`https://equran.id/api/surat`)
+      .get(`https://equran.id/api/v2/surat`)
       .then(async (res) => {
-        setSurahList(res.data);
-        setSurahAll(res.data);
+        // Access res.data.data because the new API response nests the array under 'data'
+        setSurahList(res.data.data);
+        setSurahAll(res.data.data);
       })
       .catch((err) => {
         console.log(err);
@@ -27,8 +28,9 @@ export default function SurahList() {
   const searchSurah = (event) => {
     let updatedList = viewBookmark ? bookmark : surahAll;
     updatedList = updatedList.filter(function (item) {
+      // Use item.namaLatin for searching
       return (
-        item.nama_latin
+        item.namaLatin
           .toLowerCase()
           .search(event.target.value.toLowerCase()) !== -1
       );
@@ -216,17 +218,21 @@ export default function SurahList() {
                     <h3 className="text-2xl font-arabic font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors duration-200">
                       {item.nama}
                     </h3>
+                    {/* Use item.namaLatin */}
                     <p className="text-lg font-medium text-gray-700 mb-2">
-                      {item.nama_latin}
+                      {item.namaLatin}
                     </p>
+                    {/* Use item.arti */}
                     <p className="text-emerald-600 font-medium">{item.arti}</p>
                   </a>
                 </div>
 
                 <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
                   <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{item.jumlah_ayat} Ayat</span>
-                    <span className="capitalize">{item.tempat_turun}</span>
+                    {/* Use item.jumlahAyat */}
+                    <span>{item.jumlahAyat} Ayat</span>
+                    {/* Use item.tempatTurun */}
+                    <span className="capitalize">{item.tempatTurun}</span>
                   </div>
                 </div>
               </div>

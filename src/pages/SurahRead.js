@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from "react"; // Add useCallback
+import { useEffect, useState, useRef, useCallback } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -37,24 +37,27 @@ export default function SurahRead() {
   const getSurahData = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get(`https://equran.id/api/surat/${no}`);
-      setSurahData(res.data);
-      setSurahRead(res.data.ayat);
-      document.title = `${res.data.nama_latin} - Al-Qur'an`;
+      const res = await axios.get(`https://equran.id/api/v2/surat/${no}`);
+      // Access res.data.data for surah details
+      const data = res.data.data;
+      setSurahData(data);
+      setSurahRead(data.ayat); // Access data.ayat for verses
+      document.title = `${data.namaLatin} - Al-Qur'an`; // Use namaLatin
 
       // Inisialisasi Audio object setelah data surah didapatkan
       // Check if audioRef.current exists before updating src
       if (audioRef.current === null) {
-        audioRef.current = new Audio(res.data.audio);
+        // Use data.audioFull["01"] for the main surah audio
+        audioRef.current = new Audio(data.audioFull["01"]);
         audioRef.current.onended = () => {
           setIsPlayingAudio(false);
         };
         audioRef.current.onpause = () => {
           setIsPlayingAudio(false);
         };
-      } else if (res.data.audio) {
+      } else if (data.audioFull && data.audioFull["01"]) {
         // If surah changes, update audio source
-        audioRef.current.src = res.data.audio;
+        audioRef.current.src = data.audioFull["01"];
         audioRef.current.load();
         setIsPlayingAudio(false);
       }
@@ -131,12 +134,6 @@ export default function SurahRead() {
     };
   }, [no, getSurahData]); // Depend on `no` and `getSurahData`
 
-  // Removed handleVerseClick as it's not used in your current JSX
-  // If you want to use it, you'd add onClick={() => handleVerseClick(index)} to a verse element.
-  // const handleVerseClick = (index) => {
-  //   setActiveVerse(activeVerse === index ? null : index);
-  // };
-
   const navigateSurah = (direction) => {
     // Stop audio when navigating
     if (audioRef.current) {
@@ -160,10 +157,10 @@ export default function SurahRead() {
     } else {
       addBookmark({
         nomor: surahData.nomor,
-        nama_latin: surahData.nama_latin,
+        nama_latin: surahData.namaLatin, // Use namaLatin
         arti: surahData.arti,
-        jumlah_ayat: surahData.jumlah_ayat,
-        tempat_turun: surahData.tempat_turun,
+        jumlah_ayat: surahData.jumlahAyat, // Use jumlahAyat
+        tempat_turun: surahData.tempatTurun, // Use tempatTurun
         link: `/baca/${surahData.nomor}`, // Link to this surah
       });
     }
@@ -171,14 +168,17 @@ export default function SurahRead() {
 
   // Function to play or pause entire surah audio
   const toggleSurahAudio = async () => {
-    if (!surahData.audio) {
+    // Access the specific audio URL for the full surah from audioFull object
+    const surahAudioUrl = surahData.audioFull && surahData.audioFull["01"];
+
+    if (!surahAudioUrl) {
       alert("Maaf, audio untuk surah ini tidak tersedia.");
       return;
     }
 
     if (!audioRef.current) {
       // Initialize Audio object if it doesn't exist
-      audioRef.current = new Audio(surahData.audio);
+      audioRef.current = new Audio(surahAudioUrl);
       audioRef.current.onended = () => {
         setIsPlayingAudio(false);
       };
@@ -240,7 +240,8 @@ export default function SurahRead() {
                 isScrolled ? "text-gray-800" : "text-white"
               }`}
             >
-              {surahData.nama_latin || "Memuat..."}
+              {surahData.namaLatin || "Memuat..."}
+              {/* Use namaLatin */}
             </h1>
             <p
               className={`text-xs mt-1 truncate ${
@@ -364,16 +365,19 @@ export default function SurahRead() {
               </div>
 
               <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                {surahData.nama_latin}
+                {surahData.namaLatin}
+                {/* Use namaLatin */}
               </h2>
               <p className="text-lg font-medium text-emerald-600">
                 {surahData.arti}
               </p>
 
               <div className="flex justify-center space-x-4 text-sm text-gray-500 mt-4 mb-4">
-                <span>{surahData.jumlah_ayat} Ayat</span>
+                <span>{surahData.jumlahAyat} Ayat</span>
+                {/* Use jumlahAyat */}
                 <span>•</span>
-                <span className="capitalize">{surahData.tempat_turun}</span>
+                <span className="capitalize">{surahData.tempatTurun}</span>
+                {/* Use tempatTurun */}
               </div>
 
               {/* Dengarkan button for the entire surah */}
@@ -383,7 +387,12 @@ export default function SurahRead() {
                 aria-label={
                   isPlayingAudio ? "Jeda Audio Surah" : "Dengarkan Surah"
                 }
-                disabled={loading || !surahData.audio}
+                // Ensure surahData.audioFull is checked for existence of any key
+                disabled={
+                  loading ||
+                  !surahData.audioFull ||
+                  Object.keys(surahData.audioFull).length === 0
+                }
               >
                 {isPlayingAudio ? (
                   <FiPause className="h-6 w-6 mr-3" />
@@ -409,19 +418,25 @@ export default function SurahRead() {
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md">
-                        {convertToArabicNumbers(item.nomor)}
+                        {convertToArabicNumbers(item.nomorAyat)}
+                        {/* Use nomorAyat */}
                       </div>
                       {/* Bookmark button per ayat (was here) */}
                     </div>
                     <p className="text-right text-3xl font-arabic leading-loose text-gray-800 mb-4">
-                      {item.ar}
+                      {item.teksArab}
+                      {/* Use teksArab */}
                     </p>
 
                     <div className="flex flex-col gap-2 mb-3">
                       <p className="text-gray-700">
-                        <RawHTML>{item.tr}</RawHTML>
+                        <RawHTML>{item.teksLatin}</RawHTML>
+                        {/* Use teksLatin */}
                       </p>
-                      <p className="text-gray-600 italic">{item.idn}</p>
+                      <p className="text-gray-600 italic">
+                        {item.teksIndonesia}
+                      </p>
+                      {/* Use teksIndonesia */}
                     </div>
 
                     <div className="flex justify-end space-x-3 mt-4 border-t border-gray-100 pt-4">
@@ -446,7 +461,12 @@ export default function SurahRead() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between">
           <button
             onClick={() => navigateSurah(-1)}
-            disabled={parseInt(no) <= 1}
+            // Check suratSebelumnya from surahData
+            disabled={
+              loading ||
+              !surahData.suratSebelumnya ||
+              surahData.suratSebelumnya === false
+            }
             className="px-6 py-3 rounded-full bg-gray-100 hover:bg-gray-200 transition duration-200 flex items-center text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <FiChevronLeft className="h-5 w-5 mr-2" />
@@ -455,7 +475,12 @@ export default function SurahRead() {
 
           <button
             onClick={() => navigateSurah(1)}
-            disabled={parseInt(no) >= 114}
+            // Check suratSelanjutnya from surahData
+            disabled={
+              loading ||
+              !surahData.suratSelanjutnya ||
+              surahData.suratSelanjutnya === false
+            }
             className="px-6 py-3 rounded-full bg-gray-100 hover:bg-gray-200 transition duration-200 flex items-center text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Selanjutnya
