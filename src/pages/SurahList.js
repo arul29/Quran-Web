@@ -13,9 +13,8 @@ export default function SurahList() {
   const getSurahList = async () => {
     setLoading(true);
     await axios
-      .get(`https://equran.id/api/v2/surat`)
+      .get(`https://equran.id/api/v2/surat`) // Pastikan ini sudah v2
       .then(async (res) => {
-        // Access res.data.data because the new API response nests the array under 'data'
         setSurahList(res.data.data);
         setSurahAll(res.data.data);
       })
@@ -28,7 +27,6 @@ export default function SurahList() {
   const searchSurah = (event) => {
     let updatedList = viewBookmark ? bookmark : surahAll;
     updatedList = updatedList.filter(function (item) {
-      // Use item.namaLatin for searching
       return (
         item.namaLatin
           .toLowerCase()
@@ -56,7 +54,22 @@ export default function SurahList() {
     } else {
       newBookmark = JSON.parse(oldBookmark);
     }
-    localStorage.setItem("bookmark", JSON.stringify(newBookmark.concat(item)));
+    // Pastikan properti yang disimpan di bookmark sesuai dengan format yang Anda inginkan
+    // Ini penting agar SurahList bisa menampilkan namaLatin, jumlahAyat, tempatTurun dengan benar
+    localStorage.setItem(
+      "bookmark",
+      JSON.stringify(
+        newBookmark.concat({
+          nomor: item.nomor,
+          nama: item.nama,
+          namaLatin: item.namaLatin, // Simpan namaLatin
+          jumlahAyat: item.jumlahAyat, // Simpan jumlahAyat
+          tempatTurun: item.tempatTurun, // Simpan tempatTurun
+          arti: item.arti,
+          // Jika Anda perlu menyimpan audioFull atau deskripsi, tambahkan di sini
+        })
+      )
+    );
     getBookmark();
   };
 
@@ -215,23 +228,23 @@ export default function SurahList() {
                   </div>
 
                   <a href={`/baca/${item.nomor}`} className="block">
-                    <h3 className="text-2xl font-arabic font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors duration-200">
+                    {/* MODIFIKASI DI SINI: Tambahkan dir="rtl" dan text-right */}
+                    <h3
+                      className="text-2xl font-arabic font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors duration-200 text-right"
+                      dir="rtl"
+                    >
                       {item.nama}
                     </h3>
-                    {/* Use item.namaLatin */}
                     <p className="text-lg font-medium text-gray-700 mb-2">
                       {item.namaLatin}
                     </p>
-                    {/* Use item.arti */}
                     <p className="text-emerald-600 font-medium">{item.arti}</p>
                   </a>
                 </div>
 
                 <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
                   <div className="flex items-center justify-between text-sm text-gray-500">
-                    {/* Use item.jumlahAyat */}
                     <span>{item.jumlahAyat} Ayat</span>
-                    {/* Use item.tempatTurun */}
                     <span className="capitalize">{item.tempatTurun}</span>
                   </div>
                 </div>
