@@ -19,6 +19,7 @@ import {
   Facebook,
   Link2,
   ExternalLink,
+  MoreHorizontal,
 } from "lucide-react";
 
 import { convertToArabicNumbers, RawHTML } from "../helpers";
@@ -337,6 +338,27 @@ export default function SurahRead() {
     navigator.clipboard.writeText(window.location.href);
     showToast("Link berhasil disalin!", "success");
     setIsShareModalOpen(false);
+  };
+
+  const triggerNativeShare = async () => {
+    const shareData = {
+      title: `Surah ${surahData.namaLatin} - Al-Qur'an Indonesia`,
+      text: `Baca Surah ${surahData.namaLatin} (${surahData.arti}) - ${surahData.jumlahAyat} Ayat di Al-Qur'an Indonesia.`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        setIsShareModalOpen(false);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          showToast("Gagal membuka menu share sistem.", "error");
+        }
+      }
+    } else {
+      showToast("Browser Anda tidak mendukung menu share sistem.", "info");
+    }
   };
 
   return (
@@ -686,11 +708,14 @@ export default function SurahRead() {
       {isShareModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-slate-950/40 backdrop-blur-xl animate-fade-in"
+            className="absolute inset-0 bg-slate-950/40 backdrop-blur-xl animate-fade-in cursor-pointer"
             onClick={() => setIsShareModalOpen(false)}
           ></div>
 
-          <div className="relative w-full max-w-lg animate-slide-up">
+          <div
+            className="relative w-full max-w-lg animate-slide-up z-10"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Main Glass Card */}
             <div className="relative overflow-hidden bg-white/70 dark:bg-slate-900/70 backdrop-blur-3xl rounded-[3rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] border border-white/40 dark:border-white/10">
               {/* Background Glows */}
@@ -698,7 +723,7 @@ export default function SurahRead() {
               <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-500/10 rounded-full blur-[80px] -ml-10 -mb-10"></div>
 
               {/* Header */}
-              <div className="p-8 flex items-center justify-between">
+              <div className="p-8 flex items-center justify-between relative z-10">
                 <div>
                   <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                     Sebarkan Kebaikan
@@ -709,7 +734,8 @@ export default function SurahRead() {
                 </div>
                 <button
                   onClick={() => setIsShareModalOpen(false)}
-                  className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-2xl transition-all group"
+                  className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-2xl transition-all group active:scale-90"
+                  title="Tutup"
                 >
                   <X
                     size={20}
@@ -718,7 +744,7 @@ export default function SurahRead() {
                 </button>
               </div>
 
-              <div className="px-8 pb-10 space-y-6">
+              <div className="px-8 pb-10 space-y-6 relative z-10">
                 {/* Link Preview Bento */}
                 <div className="p-5 bg-white/50 dark:bg-slate-800/50 rounded-3xl border border-white/20 dark:border-white/5 shadow-inner">
                   <div className="flex items-center gap-4">
@@ -740,7 +766,7 @@ export default function SurahRead() {
                 </div>
 
                 {/* Social Grid - Bento Style */}
-                <div className="grid grid-cols-4 gap-4">
+                <div className="grid grid-cols-5 gap-2 sm:gap-4">
                   {[
                     {
                       id: "wa",
@@ -765,31 +791,43 @@ export default function SurahRead() {
                     },
                     {
                       id: "copy",
-                      label: "Copy Link",
+                      label: "Copy",
                       icon: Link2,
                       color: "bg-emerald-600",
                       glow: "shadow-emerald-600/30",
                     },
+                    {
+                      id: "more",
+                      label: "Lainnya",
+                      icon: MoreHorizontal,
+                      color: "bg-slate-500",
+                      glow: "shadow-slate-500/30",
+                    },
                   ].map((item) => (
                     <button
                       key={item.id}
-                      onClick={() =>
-                        item.id === "copy"
-                          ? copyPageLink()
-                          : shareToSocial(item.id)
-                      }
+                      onClick={() => {
+                        if (item.id === "copy") copyPageLink();
+                        else if (item.id === "more") triggerNativeShare();
+                        else shareToSocial(item.id);
+                      }}
                       className="flex flex-col items-center gap-3 group"
                     >
                       <div
-                        className={`w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center ${item.color} text-white rounded-3xl shadow-xl ${item.glow} group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300`}
+                        className={`w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center ${item.color} text-white rounded-2xl sm:rounded-3xl shadow-xl ${item.glow} group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300`}
                       >
                         <item.icon
-                          size={26}
-                          fill={item.id === "copy" ? "none" : "currentColor"}
+                          size={22}
+                          className="sm:w-[26px] sm:h-[26px]"
+                          fill={
+                            item.id === "copy" || item.id === "more"
+                              ? "none"
+                              : "currentColor"
+                          }
                           strokeWidth={2.5}
                         />
                       </div>
-                      <span className="text-[10px] sm:text-xs font-black text-slate-700 dark:text-gray-300 uppercase tracking-wider">
+                      <span className="text-[9px] sm:text-xs font-black text-slate-700 dark:text-gray-300 uppercase tracking-wider text-center w-full truncate">
                         {item.label}
                       </span>
                     </button>
