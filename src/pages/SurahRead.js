@@ -302,24 +302,8 @@ export default function SurahRead() {
       });
   };
 
-  const handleShare = async () => {
-    const shareData = {
-      title: `Surah ${surahData.namaLatin} - Al-Qur'an Indonesia`,
-      text: `Baca Surah ${surahData.namaLatin} (${surahData.arti}) - ${surahData.jumlahAyat} Ayat di Al-Qur'an Indonesia.`,
-      url: window.location.href,
-    };
-
-    if (navigator.share) {
-      try {
-        await navigator.share(shareData);
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          setIsShareModalOpen(true);
-        }
-      }
-    } else {
-      setIsShareModalOpen(true);
-    }
+  const handleShare = () => {
+    setIsShareModalOpen(true);
   };
 
   const shareToSocial = (platform) => {
@@ -698,92 +682,145 @@ export default function SurahRead() {
         </div>
       )}
 
-      {/* Share Modal */}
+      {/* Share Modal - Next Gen 2026 Edition */}
       {isShareModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+            className="absolute inset-0 bg-slate-950/40 backdrop-blur-xl animate-fade-in"
             onClick={() => setIsShareModalOpen(false)}
           ></div>
-          <div className="relative bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-slide-up border border-white/10">
-            <div className="p-6 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                Bagikan Surah
-              </h3>
-              <button
-                onClick={() => setIsShareModalOpen(false)}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full transition-colors"
-              >
-                <X size={20} className="text-gray-500 dark:text-gray-400" />
-              </button>
-            </div>
 
-            <div className="p-8">
-              <div className="flex justify-center mb-8">
-                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/30 rounded-3xl">
-                  <Share2
-                    className="w-10 h-10 text-emerald-600 dark:text-emerald-400"
-                    strokeWidth={2.5}
+          <div className="relative w-full max-w-lg animate-slide-up">
+            {/* Main Glass Card */}
+            <div className="relative overflow-hidden bg-white/70 dark:bg-slate-900/70 backdrop-blur-3xl rounded-[3rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] border border-white/40 dark:border-white/10">
+              {/* Background Glows */}
+              <div className="absolute top-0 right-0 w-40 h-40 bg-emerald-500/20 rounded-full blur-[80px] -mr-10 -mt-10"></div>
+              <div className="absolute bottom-0 left-0 w-40 h-40 bg-blue-500/10 rounded-full blur-[80px] -ml-10 -mb-10"></div>
+
+              {/* Header */}
+              <div className="p-8 flex items-center justify-between">
+                <div>
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                    Sebarkan Kebaikan
+                  </h3>
+                  <p className="text-sm text-slate-500 dark:text-gray-400 font-medium mt-1">
+                    Pilih platform untuk berbagi surah ini
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsShareModalOpen(false)}
+                  className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-2xl transition-all group"
+                >
+                  <X
+                    size={20}
+                    className="text-slate-500 dark:text-gray-400 group-hover:text-red-500 transition-colors"
                   />
+                </button>
+              </div>
+
+              <div className="px-8 pb-10 space-y-6">
+                {/* Link Preview Bento */}
+                <div className="p-5 bg-white/50 dark:bg-slate-800/50 rounded-3xl border border-white/20 dark:border-white/5 shadow-inner">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20">
+                      <BookOpen className="text-white w-7 h-7" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-widest mb-0.5">
+                        Berbagi Surah
+                      </p>
+                      <h4 className="font-bold text-slate-900 dark:text-white truncate">
+                        {surahData.namaLatin} • {surahData.arti}
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-gray-400 truncate mt-0.5">
+                        {window.location.href}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Social Grid - Bento Style */}
+                <div className="grid grid-cols-4 gap-4">
+                  {[
+                    {
+                      id: "wa",
+                      label: "WhatsApp",
+                      icon: MessageCircle,
+                      color: "bg-green-500",
+                      glow: "shadow-green-500/30",
+                    },
+                    {
+                      id: "x",
+                      label: "X",
+                      icon: Twitter,
+                      color: "bg-slate-900 dark:bg-black",
+                      glow: "shadow-slate-950/30",
+                    },
+                    {
+                      id: "fb",
+                      label: "Facebook",
+                      icon: Facebook,
+                      color: "bg-blue-600",
+                      glow: "shadow-blue-600/30",
+                    },
+                    {
+                      id: "copy",
+                      label: "Copy Link",
+                      icon: Link2,
+                      color: "bg-emerald-600",
+                      glow: "shadow-emerald-600/30",
+                    },
+                  ].map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() =>
+                        item.id === "copy"
+                          ? copyPageLink()
+                          : shareToSocial(item.id)
+                      }
+                      className="flex flex-col items-center gap-3 group"
+                    >
+                      <div
+                        className={`w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center ${item.color} text-white rounded-3xl shadow-xl ${item.glow} group-hover:scale-110 group-hover:-translate-y-1 transition-all duration-300`}
+                      >
+                        <item.icon
+                          size={26}
+                          fill={item.id === "copy" ? "none" : "currentColor"}
+                          strokeWidth={2.5}
+                        />
+                      </div>
+                      <span className="text-[10px] sm:text-xs font-black text-slate-700 dark:text-gray-300 uppercase tracking-wider">
+                        {item.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Secondary Actions */}
+                <div className="pt-2">
+                  <button
+                    onClick={() => {
+                      window.open(
+                        `https://www.google.com/search?q=tafsir+surat+${surahData.namaLatin}`,
+                        "_blank",
+                      );
+                      setIsShareModalOpen(false);
+                    }}
+                    className="w-full py-4 px-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-2xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity active:scale-[0.98]"
+                  >
+                    <ExternalLink size={18} />
+                    Pelajari Lebih Lanjut
+                  </button>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <button
-                  onClick={() => shareToSocial("wa")}
-                  className="flex flex-col items-center gap-3 p-4 rounded-2xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all group"
-                >
-                  <div className="w-12 h-12 flex items-center justify-center bg-green-500 text-white rounded-full shadow-lg shadow-green-500/20 group-hover:scale-110 transition-transform">
-                    <MessageCircle size={24} fill="currentColor" />
-                  </div>
-                  <span className="text-sm font-semibold dark:text-white">
-                    WhatsApp
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => shareToSocial("x")}
-                  className="flex flex-col items-center gap-3 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all group"
-                >
-                  <div className="w-12 h-12 flex items-center justify-center bg-slate-900 text-white rounded-full shadow-lg shadow-slate-900/20 group-hover:scale-110 transition-transform">
-                    <Twitter size={24} fill="currentColor" />
-                  </div>
-                  <span className="text-sm font-semibold dark:text-white">
-                    X (Twitter)
-                  </span>
-                </button>
-
-                <button
-                  onClick={() => shareToSocial("fb")}
-                  className="flex flex-col items-center gap-3 p-4 rounded-2xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group"
-                >
-                  <div className="w-12 h-12 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg shadow-blue-600/20 group-hover:scale-110 transition-transform">
-                    <Facebook size={24} fill="currentColor" />
-                  </div>
-                  <span className="text-sm font-semibold dark:text-white">
-                    Facebook
-                  </span>
-                </button>
-
-                <button
-                  onClick={copyPageLink}
-                  className="flex flex-col items-center gap-3 p-4 rounded-2xl hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all group"
-                >
-                  <div className="w-12 h-12 flex items-center justify-center bg-amber-500 text-white rounded-full shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform">
-                    <Link2 size={24} />
-                  </div>
-                  <span className="text-sm font-semibold dark:text-white">
-                    Salin Link
-                  </span>
-                </button>
+              {/* Spiritual Footer */}
+              <div className="bg-emerald-600 dark:bg-emerald-900/50 p-6">
+                <p className="text-xs text-emerald-50 dark:text-emerald-300 leading-relaxed font-medium text-center italic">
+                  "Barangsiapa yang menunjuki kepada kebaikan, maka baginya
+                  pahala seperti pahala orang yang mengerjakannya." (HR. Muslim)
+                </p>
               </div>
-            </div>
-
-            <div className="bg-gray-50 dark:bg-slate-900/50 p-6 text-center">
-              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium italic">
-                "Barangsiapa yang menunjuki kepada kebaikan, maka baginya pahala
-                seperti pahala orang yang mengerjakannya." (HR. Muslim)
-              </p>
             </div>
           </div>
         </div>
