@@ -285,7 +285,7 @@ export default function SurahRead() {
           </div>
 
           <div className="flex space-x-2 items-center">
-            <ThemeToggle />
+            <ThemeToggle isScrolled={isScrolled} />
             <button
               onClick={toggleSurahBookmark}
               className={`p-2 rounded-full ${

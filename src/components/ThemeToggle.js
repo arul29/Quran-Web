@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { FiSun, FiMoon } from "react-icons/fi";
 
-export default function ThemeToggle() {
+export default function ThemeToggle({ isScrolled, className = "" }) {
   const [darkMode, setDarkMode] = useState(() => {
-    // Check initial theme from localStorage or system preference
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme) {
       return savedTheme === "dark";
@@ -24,13 +23,17 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setDarkMode(!darkMode)}
-      className="p-2.5 rounded-full bg-white/20 hover:bg-white/30 dark:bg-gray-800/50 dark:hover:bg-gray-700/50 backdrop-blur-md transition-all duration-300 text-white dark:text-emerald-400 shadow-lg border border-white/30 dark:border-emerald-500/30 group"
+      className={`p-2 rounded-full transition-all duration-300 group ${
+        isScrolled
+          ? "bg-white dark:bg-slate-800 shadow-md text-emerald-600 dark:text-emerald-400"
+          : "bg-white/30 text-white hover:bg-white/50"
+      } ${className}`}
       aria-label="Toggle Dark Mode"
     >
       {darkMode ? (
-        <FiSun className="w-5 h-5 group-hover:rotate-45 transition-transform duration-500" />
+        <FiSun className="w-6 h-6 group-hover:rotate-45 transition-transform duration-500" />
       ) : (
-        <FiMoon className="w-5 h-5 group-hover:-rotate-12 transition-transform duration-500" />
+        <FiMoon className="w-6 h-6 group-hover:-rotate-12 transition-transform duration-500" />
       )}
     </button>
   );
