@@ -110,23 +110,70 @@ export default function PrayerTimes() {
     }
   }, []);
 
+  const mapProvinceName = (name) => {
+    if (!name) return "";
+    const lower = name.toLowerCase();
+    if (lower.includes("jakarta")) return "DKI Jakarta";
+    if (lower.includes("yogyakarta")) return "DI Yogyakarta";
+    if (lower.includes("jawa barat") || lower.includes("west java"))
+      return "Jawa Barat";
+    if (lower.includes("jawa tengah") || lower.includes("central java"))
+      return "Jawa Tengah";
+    if (lower.includes("jawa timur") || lower.includes("east java"))
+      return "Jawa Timur";
+    if (lower.includes("sumatera utara") || lower.includes("north sumatra"))
+      return "Sumatera Utara";
+    if (lower.includes("sumatera barat") || lower.includes("west sumatra"))
+      return "Sumatera Barat";
+    if (lower.includes("sumatera selatan") || lower.includes("south sumatra"))
+      return "Sumatera Selatan";
+    if (lower.includes("sulawesi selatan") || lower.includes("south sulawesi"))
+      return "Sulawesi Selatan";
+    if (lower.includes("sulawesi utara") || lower.includes("north sulawesi"))
+      return "Sulawesi Utara";
+    if (lower.includes("kalimantan timur") || lower.includes("east kalimantan"))
+      return "Kalimantan Timur";
+    if (lower.includes("kalimantan barat") || lower.includes("west kalimantan"))
+      return "Kalimantan Barat";
+    if (
+      lower.includes("nusa tenggara barat") ||
+      lower.includes("west nusa tenggara")
+    )
+      return "Nusa Tenggara Barat";
+    if (
+      lower.includes("nusa tenggara timur") ||
+      lower.includes("east nusa tenggara")
+    )
+      return "Nusa Tenggara Timur";
+    return name;
+  };
+
+  const findBestMatch = (list, target) => {
+    if (!target || !list.length) return null;
+    const normalizedTarget = mapProvinceName(target).toLowerCase();
+    return list.find((item) => {
+      const normalizedItem = item.toLowerCase();
+      return (
+        normalizedTarget.includes(normalizedItem) ||
+        normalizedItem.includes(normalizedTarget)
+      );
+    });
+  };
+
   // Initialize
   useEffect(() => {
     const init = async () => {
-      // 1. Fetch provinces first as they are needed for matching
       let allProvinces = provinces;
-      if (provinces.length === 0) {
-        try {
-          const res = await axios.get(
-            "https://equran.id/api/v2/imsakiyah/provinsi",
-          );
-          if (res.data.code === 200) {
-            allProvinces = res.data.data;
-            setProvinces(allProvinces);
-          }
-        } catch (err) {
-          console.error("Gagal ambil provinsi", err);
+      try {
+        const res = await axios.get(
+          "https://equran.id/api/v2/imsakiyah/provinsi",
+        );
+        if (res.data.code === 200) {
+          allProvinces = res.data.data;
+          setProvinces(allProvinces);
         }
+      } catch (err) {
+        console.error("Gagal ambil provinsi", err);
       }
 
       const saved = localStorage.getItem("user_location");
@@ -136,13 +183,12 @@ export default function PrayerTimes() {
           setLocation(currentLoc);
           await fetchCities(currentLoc.provinsi);
           await fetchImsakiyah(currentLoc.provinsi, currentLoc.kabkota);
-          return; // Exit if loaded from saved
+          return;
         } catch (e) {
           console.error("Invalid saved location", e);
         }
       }
 
-      // 2. If no saved location, try auto-detect
       if (navigator.geolocation) {
         setDetecting(true);
         navigator.geolocation.getCurrentPosition(
@@ -156,35 +202,21 @@ export default function PrayerTimes() {
                 addr.city || addr.town || addr.city_district || addr.county;
               const state = addr.state;
 
-              if (state && city && allProvinces.length > 0) {
-                const matchedProv = allProvinces.find(
-                  (p) =>
-                    state.toLowerCase().includes(p.toLowerCase()) ||
-                    p.toLowerCase().includes(state.toLowerCase()),
+              const matchedProv = findBestMatch(allProvinces, state);
+              if (matchedProv) {
+                const fetchedCities = await fetchCities(matchedProv);
+                const matchedCity = fetchedCities.find(
+                  (c) =>
+                    city.toLowerCase().includes(c.toLowerCase()) ||
+                    c.toLowerCase().includes(city.toLowerCase()),
                 );
 
-                if (matchedProv) {
-                  const fetchedCities = await fetchCities(matchedProv);
-                  const matchedCity = fetchedCities.find(
-                    (c) =>
-                      city.toLowerCase().includes(c.toLowerCase()) ||
-                      c.toLowerCase().includes(city.toLowerCase()),
-                  );
-
-                  if (matchedCity) {
-                    await fetchImsakiyah(matchedProv, matchedCity);
-                    setDetecting(false);
-                    return;
-                  }
+                if (matchedCity) {
+                  await fetchImsakiyah(matchedProv, matchedCity);
+                  return;
                 }
               }
-              // Fallback if no match found
-              const fallback = {
-                provinsi: "DKI Jakarta",
-                kabkota: "Kota Jakarta Pusat",
-              };
-              await fetchCities(fallback.provinsi);
-              await fetchImsakiyah(fallback.provinsi, fallback.kabkota);
+              throw new Error("No match");
             } catch (err) {
               const fallback = {
                 provinsi: "DKI Jakarta",
@@ -197,7 +229,6 @@ export default function PrayerTimes() {
             }
           },
           async () => {
-            // Geolocation denied or failed
             setDetecting(false);
             const fallback = {
               provinsi: "DKI Jakarta",
@@ -250,41 +281,36 @@ export default function PrayerTimes() {
             const res = await axios.get(
               `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`,
             );
-            const addr = res.data.address;
+            const state = res.data.address.state;
             const city =
-              addr.city || addr.town || addr.city_district || addr.county;
-            const state = addr.state;
+              res.data.address.city ||
+              res.data.address.town ||
+              res.data.address.city_district ||
+              res.data.address.county;
 
-            if (state && city) {
-              // Find closest match in our API list if possible
-              // For now, try to find province prefix match
-              const matchedProv = provinces.find(
-                (p) =>
-                  state.toLowerCase().includes(p.toLowerCase()) ||
-                  p.toLowerCase().includes(state.toLowerCase()),
+            const matchedProv = findBestMatch(provinces, state);
+            if (matchedProv) {
+              const fetchedCities = await fetchCities(matchedProv);
+              const matchedCity = fetchedCities.find(
+                (c) =>
+                  city.toLowerCase().includes(c.toLowerCase()) ||
+                  c.toLowerCase().includes(city.toLowerCase()),
               );
-              if (matchedProv) {
-                const fetchedCities = await fetchCities(matchedProv);
-                const matchedCity = fetchedCities.find(
-                  (c) =>
-                    city.toLowerCase().includes(c.toLowerCase()) ||
-                    c.toLowerCase().includes(city.toLowerCase()),
-                );
-                if (matchedCity) {
-                  fetchImsakiyah(matchedProv, matchedCity);
-                  setIsEditing(false);
-                } else {
-                  setLocation({
-                    provinsi: matchedProv,
-                    kabkota: "Pilih Kab/Kota",
-                  });
-                  setError(`Berada di ${state}, silakan pilih kota terdekat.`);
-                }
+
+              if (matchedCity) {
+                fetchImsakiyah(matchedProv, matchedCity);
+                setIsEditing(false);
               } else {
-                setError("Provinsi tidak ditemukan.");
+                setLocation({
+                  provinsi: matchedProv,
+                  kabkota: "Pilih Kab/Kota",
+                });
+                setError(`Berada di ${state}, silakan pilih kota.`);
               }
             } else {
-              setError("Gagal mendeteksi kota atau provinsi dari lokasi Anda.");
+              setError(
+                `Provinsi '${state}' tidak dikenali oleh sistem Kemenag.`,
+              );
             }
           } catch (err) {
             setError("Gagal mendeteksi nama lokasi");
@@ -294,13 +320,9 @@ export default function PrayerTimes() {
         },
         (err) => {
           setDetecting(false);
-          if (err.code === err.PERMISSION_DENIED) {
-            setError(
-              "Izin lokasi ditolak. Silakan izinkan di pengaturan browser Anda.",
-            );
-          } else {
-            setError("Gagal mendapatkan lokasi Anda.");
-          }
+          setError(
+            err.code === 1 ? "Izin lokasi ditolak." : "Gagal mendapat lokasi.",
+          );
         },
       );
     } else {
