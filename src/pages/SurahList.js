@@ -17,6 +17,7 @@ import SEO from "../components/SEO";
 import ThemeToggle from "../components/ThemeToggle";
 import RamadhanBanner from "../components/RamadhanBanner";
 import PrayerTimes from "../components/PrayerTimes";
+import ShalatTimes from "../components/ShalatTimes";
 
 export default function SurahList() {
   const [loading, setLoading] = useState(false);
@@ -118,6 +119,19 @@ export default function SurahList() {
     getLastRead();
   }, []);
 
+  // Check if current Hijri month is Ramadhan (9th month)
+  const isRamadhan = () => {
+    try {
+      const today = new Date();
+      const hijriMonth = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", {
+        month: "numeric",
+      }).format(today);
+      return hijriMonth === "9";
+    } catch (e) {
+      return false;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300">
       <SEO
@@ -178,7 +192,7 @@ export default function SurahList() {
         {!viewBookmark && (
           <div className="space-y-8 mb-12">
             <RamadhanBanner />
-            <PrayerTimes />
+            {isRamadhan() ? <PrayerTimes /> : <ShalatTimes />}
           </div>
         )}
 
