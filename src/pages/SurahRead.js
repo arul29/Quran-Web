@@ -250,19 +250,25 @@ export default function SurahRead() {
       <SEO
         title={
           surahData.namaLatin
-            ? `${surahData.namaLatin} (${surahData.arti})`
+            ? `${surahData.namaLatin} - Al-Qur'an Indonesia`
             : "Memuat Surah..."
         }
         description={
           surahData.namaLatin
-            ? `Baca Surah ${surahData.namaLatin} (${surahData.arti}) lengkap dengan terjemahan Bahasa Indonesia, teks Arab, dan audio resmi di Al-Qur'an Indonesia.`
-            : "Baca Al-Qur'an Online dengan terjemahan Bahasa Indonesia."
+            ? `Baca Surah ${surahData.namaLatin} (${surahData.arti}) ayat 1-${surahData.jumlahAyat} lengkap dengan terjemahan Bahasa Indonesia, teks Arab, audio, dan tafsir resmi di Al-Qur'an Indonesia.`
+            : "Baca Al-Qur'an Online dengan terjemahan Bahasa Indonesia, audio, dan tafsir lengkap 30 Juz."
         }
         ogTitle={
           surahData.namaLatin
-            ? `${surahData.namaLatin} - Al-Qur'an Indonesia`
+            ? `Surah ${surahData.namaLatin} - Al-Qur'an Indonesia`
             : "Al-Qur'an Indonesia"
         }
+        ogDescription={
+          surahData.namaLatin
+            ? `Baca Surah ${surahData.namaLatin} (${surahData.arti}) dengan terjemahan Indonesia, audio per ayat, dan tafsir lengkap dari Kemenag.`
+            : "Baca Al-Qur'an Online Lengkap 30 Juz dengan terjemahan Bahasa Indonesia, audio resmi, dan tafsir."
+        }
+        ogUrl={`https://quran.darul.id/baca/${surahData.nomor}`}
         breadcrumbList={[
           { name: "Beranda", url: "https://quran.darul.id" },
           {
