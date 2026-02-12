@@ -356,9 +356,9 @@ export default function PrayerTimes() {
 
       <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-8 relative z-20">
         <div className="flex-1">
-          <h3 className="text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2 mb-2">
-            <Clock className="text-emerald-500" />
-            Jadwal Imsakiyah 1447H
+          <h3 className="text-2xl font-black text-gray-900 dark:text-white flex flex-col md:flex-row items-center justify-center md:justify-start gap-2 md:gap-3 mb-4 md:mb-2 text-center md:text-left">
+            <Clock className="text-emerald-500 w-8 h-8 md:w-6 md:h-6" />
+            <span>Jadwal Imsakiyah 1447H</span>
           </h3>
 
           <div className="mt-2">
