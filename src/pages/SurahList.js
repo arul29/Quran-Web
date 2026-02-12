@@ -10,10 +10,14 @@ import {
   X,
   Trash2,
   HelpCircle,
+  Sparkles,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import ThemeToggle from "../components/ThemeToggle";
+import RamadhanBanner from "../components/RamadhanBanner";
+import PrayerTimes from "../components/PrayerTimes";
+import ShalatTimes from "../components/ShalatTimes";
 
 export default function SurahList() {
   const [loading, setLoading] = useState(false);
@@ -115,6 +119,19 @@ export default function SurahList() {
     getLastRead();
   }, []);
 
+  // Check if current Hijri month is Ramadhan (9th month)
+  const isRamadhan = () => {
+    try {
+      const today = new Date();
+      const hijriMonth = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", {
+        month: "numeric",
+      }).format(today);
+      return hijriMonth === "9";
+    } catch (e) {
+      return false;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300">
       <SEO
@@ -123,78 +140,106 @@ export default function SurahList() {
         isHomePage={true}
       />
       {/* Header Section */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-blue-600 dark:from-emerald-900 dark:to-slate-900">
-        <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
+      <div className="relative overflow-hidden bg-[#0a2e26] dark:bg-slate-950 pt-20 pb-16 sm:py-24 px-4 sm:px-6">
+        {/* Decorative Elements */}
+        <div className="absolute inset-0 opacity-10 pointer-events-none">
+          <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/islamic-art.png')]"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-950/50 to-[#0a2e26] dark:to-slate-950"></div>
+        </div>
+
+        <div className="absolute top-6 right-6 z-50 flex items-center gap-2">
+          <ThemeToggle />
           <Link
             to="/bantuan"
-            className="p-2 bg-white/20 hover:bg-white/30 rounded-xl backdrop-blur-md text-white transition-all active:scale-95 group"
+            className="p-2.5 bg-white/10 hover:bg-white/20 rounded-2xl backdrop-blur-md text-white transition-all active:scale-95 group border border-white/10"
             title="Pusat Bantuan"
           >
-            <HelpCircle className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+            <HelpCircle className="w-5 h-5 group-hover:rotate-12 transition-transform" />
           </Link>
-          <ThemeToggle />
         </div>
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-4">
-            Al-Qur'an Indonesia
+
+        <div className="relative max-w-4xl mx-auto text-center space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/20 rounded-full border border-emerald-500/20 text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] animate-fade-in">
+            Al-Qur'an Indonesia Digital
+          </div>
+
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white tracking-tight animate-slide-up leading-[1.1]">
+            Baca <span className="text-emerald-400">Al-Qur'an</span> Dimana
+            Saja.
           </h1>
-          <p className="text-xl text-white/90 max-w-2xl mx-auto leading-relaxed">
-            Baca Al-Qur'an secara online dengan mudah, dilengkapi terjemahan
-            Bahasa Indonesia
+
+          <p className="text-lg text-emerald-100/60 max-w-xl mx-auto leading-relaxed animate-fade-in delay-100 px-4">
+            Al-Qur'an digital Indonesia lengkap dengan terjemahan, tafsir, dan
+            audio jernih dalam genggaman Anda.
           </p>
+
+          <div className="flex items-center justify-center pt-4 animate-fade-in delay-200">
+            <Link
+              to="/tanya-ai"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-white rounded-[2rem] font-bold transition-all shadow-xl shadow-emerald-500/20 active:scale-95 group"
+            >
+              <Sparkles
+                size={20}
+                className="group-hover:rotate-12 transition-transform"
+              />
+              Cari Ayat & Doa
+            </Link>
+          </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Search & Filter Section */}
-        <div className="mb-12">
-          <div className="max-w-2xl mx-auto">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" strokeWidth={2.5} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        {!viewBookmark && (
+          <div className="space-y-8 mb-12">
+            <RamadhanBanner />
+            {isRamadhan() ? <PrayerTimes /> : <ShalatTimes />}
+          </div>
+        )}
+
+        {/* Search & Action Section */}
+        <div className="mb-12 space-y-6">
+          <div className="w-full animate-fade-in">
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                <Search
+                  className="h-5 w-5 text-gray-400 group-focus-within:text-emerald-500 transition-colors"
+                  strokeWidth={2.5}
+                />
               </div>
               <input
                 onChange={searchSurah}
                 type="search"
-                className="w-full pl-12 pr-4 py-4 text-lg border-0 rounded-2xl bg-white dark:bg-slate-800 shadow-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none transition-all duration-200 dark:text-white dark:placeholder-gray-400"
-                placeholder="Cari berdasarkan nama Surah..."
+                className="w-full pl-14 pr-6 py-5 text-lg border border-gray-100 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900 shadow-2xl shadow-emerald-500/5 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:outline-none transition-all duration-300 dark:text-white dark:placeholder-gray-500"
+                placeholder="Cari Surah..."
               />
             </div>
           </div>
 
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8 max-w-2xl mx-auto">
+          {/* Action Buttons - Refined Side-by-Side on Mobile */}
+          <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full animate-fade-in delay-100">
             <button
               onClick={() => {
                 setViewBookmark(!viewBookmark);
                 viewBookmark ? setSurahList(surahAll) : setSurahList(bookmark);
               }}
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-full bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition-all duration-200 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium group"
+              className="flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-8 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
             >
               {viewBookmark ? (
-                <Library
-                  className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform"
-                  strokeWidth={2.5}
-                />
+                <Library className="w-5 h-5 group-hover:scale-110 transition-transform text-emerald-500" />
               ) : (
-                <Bookmark
-                  className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform"
-                  strokeWidth={2.5}
-                />
+                <Bookmark className="w-5 h-5 group-hover:scale-110 transition-transform text-emerald-500" />
               )}
-              {viewBookmark ? "Lihat Semua Surah" : "Lihat Bookmark"}
+              <span className="text-xs sm:text-base">
+                {viewBookmark ? "Semua Surah" : "Bookmark"}
+              </span>
             </button>
 
             <Link
               to="/bantuan"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-full bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition-all duration-200 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium group"
+              className="flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-8 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
             >
-              <HelpCircle
-                className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform"
-                strokeWidth={2.5}
-              />
-              Pusat Bantuan
+              <HelpCircle className="w-5 h-5 group-hover:rotate-12 transition-transform text-emerald-500" />
+              <span className="text-xs sm:text-base">Bantuan</span>
             </Link>
           </div>
         </div>
@@ -250,7 +295,7 @@ export default function SurahList() {
           </div>
         )}
 
-        {/* Surah Grid */}
+        {/* Surah List Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
             Array.from({ length: 6 }).map((_, index) => (
