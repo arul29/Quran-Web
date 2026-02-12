@@ -96,6 +96,7 @@ export default function SurahList() {
       <SEO
         title="Baca Online 30 Juz"
         description="Baca Al-Qur'an secara online di Al-Qur'an Indonesia. Tersedia 114 Surah lengkap dengan terjemahan Bahasa Indonesia dan audio."
+        isHomePage={true}
       />
       {/* Header Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-blue-600">
