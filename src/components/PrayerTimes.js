@@ -508,12 +508,12 @@ export default function PrayerTimes() {
             {dateInfo.gregorian}
           </div>
 
-          {/* Hijri Date & Time - Split but same total width */}
-          <div className="flex gap-2 w-full">
-            <div className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-600/20 text-center flex items-center justify-center whitespace-nowrap">
+          {/* Hijri Date & Time - Separate buttons with custom radius and gap */}
+          <div className="flex gap-1 w-full">
+            <div className="flex-1 px-4 py-2.5 bg-emerald-600 text-white font-black text-sm text-center flex items-center justify-center whitespace-nowrap rounded-l-2xl rounded-r-none shadow-xl shadow-emerald-600/20">
               {dateInfo.hijri}
             </div>
-            <div className="px-4 py-2.5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-600/20 text-center flex items-center justify-center min-w-[80px]">
+            <div className="px-4 py-2.5 bg-emerald-600 text-white font-black text-sm text-center flex items-center justify-center min-w-[70px] rounded-r-2xl rounded-l-none shadow-xl shadow-emerald-600/20">
               {currentTime}
             </div>
           </div>
