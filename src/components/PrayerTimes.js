@@ -361,11 +361,10 @@ export default function PrayerTimes() {
             Jadwal Imsakiyah 1447H
           </h3>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-1.5 bg-emerald-500/5 dark:bg-emerald-500/10 px-3 py-1.5 rounded-2xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all">
+          <div className="mt-2">
+            {/* Desktop Layout - Exact original emerald style */}
+            <div className="hidden sm:inline-flex items-center gap-1.5 bg-emerald-500/5 dark:bg-emerald-500/10 px-3 py-1.5 rounded-2xl border border-emerald-500/10 hover:border-emerald-500/30 transition-all">
               <MapPin size={14} className="text-red-400 shrink-0" />
-
-              {/* Province Selector */}
               <div className="relative flex items-center group/sel">
                 <select
                   value={location.provinsi}
@@ -384,11 +383,10 @@ export default function PrayerTimes() {
                 />
               </div>
 
-              <span className="text-gray-300 dark:text-gray-600 font-light">
+              <span className="text-gray-300 dark:text-gray-600 font-light mx-0.5">
                 |
               </span>
 
-              {/* City Selector */}
               <div className="relative flex items-center group/sel">
                 <select
                   value={location.kabkota}
@@ -415,17 +413,66 @@ export default function PrayerTimes() {
                 )}
               </div>
 
-              {/* Detect Button Icon */}
               <button
                 onClick={detectLocation}
                 disabled={detecting}
                 title="Deteksi Lokasi Otomatis"
-                className="ml-1 p-1.5 hover:bg-emerald-500/20 rounded-lg transition-all text-emerald-600 dark:text-emerald-400 active:scale-95 disabled:opacity-50"
+                className="p-1.5 hover:bg-emerald-500/20 rounded-lg transition-all text-emerald-600 dark:text-emerald-400 active:scale-95 disabled:opacity-50"
               >
                 {detecting ? (
                   <Loader2 size={14} className="animate-spin" />
                 ) : (
                   <Navigation size={14} />
+                )}
+              </button>
+            </div>
+
+            {/* Mobile Layout - Modern Location Card Style */}
+            <div className="sm:hidden flex items-center bg-emerald-500/5 dark:bg-emerald-500/10 p-1 rounded-2xl border border-emerald-500/10 w-full shadow-sm">
+              <div className="p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-emerald-500/5 ml-0.5">
+                <MapPin size={16} className="text-red-400" />
+              </div>
+
+              <div className="flex-1 flex flex-col justify-center px-4 min-w-0 text-left">
+                <div className="relative w-full">
+                  <select
+                    value={location.provinsi}
+                    onChange={handleProvinceChange}
+                    className="w-full bg-transparent border-none p-0 pr-4 text-[10px] font-black uppercase tracking-widest text-emerald-600/60 focus:ring-0 outline-none appearance-none"
+                  >
+                    {provinces.map((p) => (
+                      <option key={p} value={p} className="dark:bg-slate-800">
+                        {p}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="relative w-full -mt-0.5">
+                  <select
+                    value={location.kabkota}
+                    onChange={handleCityChange}
+                    disabled={loadingCities}
+                    className="w-full bg-transparent border-none p-0 pr-4 text-sm font-bold text-gray-800 dark:text-white focus:ring-0 outline-none appearance-none disabled:opacity-50 truncate text-left"
+                  >
+                    {cities.map((c) => (
+                      <option key={c} value={c} className="dark:bg-slate-800">
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <button
+                onClick={detectLocation}
+                disabled={detecting}
+                className="p-3.5 text-emerald-500 hover:bg-emerald-500/10 rounded-xl transition-all active:scale-90"
+              >
+                {detecting ? (
+                  <Loader2 size={18} className="animate-spin" />
+                ) : (
+                  <Navigation size={18} />
                 )}
               </button>
             </div>
