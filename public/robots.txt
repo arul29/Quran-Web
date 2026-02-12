@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://darul.id/sitemap.xml
+Sitemap: https://quran.darul.id/sitemap.xml
