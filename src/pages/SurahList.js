@@ -173,7 +173,7 @@ export default function SurahList() {
 
         {/* Search & Filter Section */}
         <div className="mb-12">
-          <div className="max-w-2xl mx-auto">
+          <div className="w-full">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <Search className="h-5 w-5 text-gray-400" strokeWidth={2.5} />
@@ -188,22 +188,22 @@ export default function SurahList() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8 max-w-2xl mx-auto">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8 w-full mx-auto">
             <button
               onClick={() => {
                 setViewBookmark(!viewBookmark);
                 viewBookmark ? setSurahList(surahAll) : setSurahList(bookmark);
               }}
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-full bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition-all duration-200 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium group"
+              className="w-full sm:flex-1 inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-white dark:bg-slate-800 shadow-md hover:shadow-xl transition-all duration-300 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-bold group border border-gray-100 dark:border-slate-700"
             >
               {viewBookmark ? (
                 <Library
-                  className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform"
+                  className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform"
                   strokeWidth={2.5}
                 />
               ) : (
                 <Bookmark
-                  className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform"
+                  className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform"
                   strokeWidth={2.5}
                 />
               )}
@@ -212,10 +212,10 @@ export default function SurahList() {
 
             <Link
               to="/bantuan"
-              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-full bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition-all duration-200 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium group"
+              className="w-full sm:flex-1 inline-flex items-center justify-center px-8 py-4 rounded-2xl bg-white dark:bg-slate-800 shadow-md hover:shadow-xl transition-all duration-300 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-bold group border border-gray-100 dark:border-slate-700"
             >
               <HelpCircle
-                className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform"
+                className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform"
                 strokeWidth={2.5}
               />
               Pusat Bantuan
