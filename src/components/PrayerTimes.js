@@ -31,6 +31,22 @@ export default function PrayerTimes() {
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [detecting, setDetecting] = useState(false);
+  const [currentTime, setCurrentTime] = useState("");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(
+        now.toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      );
+    };
+    updateTime();
+    const timer = setInterval(updateTime, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const fetchProvinces = async () => {
     try {
@@ -486,12 +502,20 @@ export default function PrayerTimes() {
           )}
         </div>
 
-        <div className="flex flex-col items-center md:items-end gap-2 text-right">
-          <div className="px-5 py-2.5 bg-white dark:bg-slate-700/50 text-gray-700 dark:text-emerald-400 rounded-2xl font-bold text-sm border border-gray-100 dark:border-white/5 shadow-sm">
+        <div className="flex flex-col items-center md:items-end gap-2 text-right w-full md:w-auto mt-4 md:mt-0">
+          {/* Gregorian Date - Full Width */}
+          <div className="w-full px-5 py-2.5 bg-white dark:bg-slate-700/50 text-gray-700 dark:text-emerald-400 rounded-2xl font-bold text-sm border border-gray-100 dark:border-white/5 shadow-sm text-center">
             {dateInfo.gregorian}
           </div>
-          <div className="px-5 py-2.5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-600/20">
-            {dateInfo.hijri}
+
+          {/* Hijri Date & Time - Split but same total width */}
+          <div className="flex gap-2 w-full">
+            <div className="flex-1 px-4 py-2.5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-600/20 text-center flex items-center justify-center whitespace-nowrap">
+              {dateInfo.hijri}
+            </div>
+            <div className="px-4 py-2.5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-600/20 text-center flex items-center justify-center min-w-[80px]">
+              {currentTime}
+            </div>
           </div>
         </div>
       </div>
