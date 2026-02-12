@@ -17,6 +17,7 @@ import { BsBookmarkFill } from "react-icons/bs"; // Filled bookmark icon
 import { convertToArabicNumbers, RawHTML } from "../helpers";
 import { FaBoxOpen } from "react-icons/fa";
 import SEO from "../components/SEO";
+import ThemeToggle from "../components/ThemeToggle";
 
 export default function SurahRead() {
   const { no } = useParams();
@@ -205,7 +206,7 @@ export default function SurahRead() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300">
       <SEO
         title={
           surahData.namaLatin
@@ -235,8 +236,8 @@ export default function SurahRead() {
         ref={headerRef}
         className={`relative overflow-hidden ${
           isScrolled
-            ? "bg-white/90 shadow-sm py-2"
-            : "bg-gradient-to-r from-emerald-600 to-blue-600 py-4"
+            ? "bg-white/90 dark:bg-slate-900/90 shadow-sm py-2 backdrop-blur-md"
+            : "bg-gradient-to-r from-emerald-600 to-blue-600 dark:from-emerald-900 dark:to-slate-900 py-4"
         } transition-all duration-300 sticky top-0 z-50`}
       >
         <div
@@ -248,13 +249,17 @@ export default function SurahRead() {
           <button
             onClick={() => navigate(-1)}
             className={`p-2 rounded-full ${
-              isScrolled ? "bg-white shadow-md" : "bg-white/30"
+              isScrolled
+                ? "bg-white dark:bg-slate-800 shadow-md"
+                : "bg-white/30"
             } hover:bg-white/50 transition duration-200`}
             aria-label="Kembali"
           >
             <FiArrowLeft
               className={`h-6 w-6 ${
-                isScrolled ? "text-emerald-600" : "text-white"
+                isScrolled
+                  ? "text-emerald-600 dark:text-emerald-400"
+                  : "text-white"
               }`}
             />
           </button>
@@ -262,7 +267,7 @@ export default function SurahRead() {
           <div className="text-center flex-1 mx-4">
             <h1
               className={`font-bold text-lg md:text-xl truncate ${
-                isScrolled ? "text-gray-800" : "text-white"
+                isScrolled ? "text-gray-800 dark:text-white" : "text-white"
               }`}
             >
               {surahData.namaLatin || "Memuat..."}
@@ -270,18 +275,23 @@ export default function SurahRead() {
             </h1>
             <p
               className={`text-xs mt-1 truncate ${
-                isScrolled ? "text-gray-500" : "text-white/90"
+                isScrolled
+                  ? "text-gray-500 dark:text-gray-400"
+                  : "text-white/90"
               }`}
             >
               {surahData.arti || "Al-Qur'an Indonesia"}
             </p>
           </div>
 
-          <div className="flex space-x-2">
+          <div className="flex space-x-2 items-center">
+            <ThemeToggle />
             <button
               onClick={toggleSurahBookmark}
               className={`p-2 rounded-full ${
-                isScrolled ? "bg-white shadow-md" : "bg-white/30"
+                isScrolled
+                  ? "bg-white dark:bg-slate-800 shadow-md"
+                  : "bg-white/30"
               } hover:bg-white/50 transition duration-200`}
               aria-label="Bookmark Surah"
               disabled={loading}
@@ -289,26 +299,34 @@ export default function SurahRead() {
               {surahData.nomor && isBookmark(surahData.nomor) ? (
                 <BsBookmarkFill
                   className={`h-6 w-6 ${
-                    isScrolled ? "text-emerald-600" : "text-white"
+                    isScrolled
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-white"
                   }`}
                 />
               ) : (
                 <FiBookmark
                   className={`h-6 w-6 ${
-                    isScrolled ? "text-emerald-600" : "text-white"
+                    isScrolled
+                      ? "text-emerald-600 dark:text-emerald-400"
+                      : "text-white"
                   }`}
                 />
               )}
             </button>
             <button
               className={`p-2 rounded-full ${
-                isScrolled ? "bg-white shadow-md" : "bg-white/30"
+                isScrolled
+                  ? "bg-white dark:bg-slate-800 shadow-md"
+                  : "bg-white/30"
               } hover:bg-white/50 transition duration-200`}
               aria-label="Bagikan"
             >
               <FiShare2
                 className={`h-6 w-6 ${
-                  isScrolled ? "text-emerald-600" : "text-white"
+                  isScrolled
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-white"
                 }`}
               />
             </button>
@@ -322,23 +340,23 @@ export default function SurahRead() {
           // Modified Loading Skeleton
           <div className="animate-pulse">
             {/* Surah Header Card Skeleton */}
-            <div className="bg-white rounded-2xl shadow-sm p-6 mb-8 text-center border border-gray-100">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 mb-8 text-center border border-gray-100 dark:border-slate-700">
               <div className="flex justify-center mb-4">
-                <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                <div className="w-24 h-24 rounded-full bg-gray-200 dark:bg-slate-700 flex items-center justify-center text-white font-bold text-xl shadow-lg">
                   {/* Arabic text placeholder */}
                 </div>
               </div>
 
-              <div className="h-8 bg-gray-200 rounded w-2/3 mx-auto mb-3"></div>
-              <div className="h-6 bg-gray-200 rounded w-1/2 mx-auto mb-4"></div>
+              <div className="h-8 bg-gray-200 dark:bg-slate-700 rounded w-2/3 mx-auto mb-3"></div>
+              <div className="h-6 bg-gray-200 dark:bg-slate-700 rounded w-1/2 mx-auto mb-4"></div>
 
-              <div className="flex justify-center space-x-4 text-sm text-gray-500 mt-4 mb-4">
-                <div className="h-4 bg-gray-200 rounded w-20"></div>
-                <div className="h-4 bg-gray-200 rounded w-4"></div>
-                <div className="h-4 bg-gray-200 rounded w-24"></div>
+              <div className="flex justify-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mt-4 mb-4">
+                <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-20"></div>
+                <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-4"></div>
+                <div className="h-4 bg-gray-200 dark:bg-slate-700 rounded w-24"></div>
               </div>
 
-              <div className="h-12 bg-gray-200 rounded-full w-56 mx-auto"></div>
+              <div className="h-12 bg-gray-200 dark:bg-slate-700 rounded-full w-56 mx-auto"></div>
             </div>
 
             {/* Verses List Skeleton (repeated for several items) */}
@@ -346,20 +364,20 @@ export default function SurahRead() {
               {Array.from({ length: 5 }).map((_, index) => (
                 <div
                   key={index}
-                  className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100"
+                  className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-slate-700"
                 >
                   <div className="flex items-start justify-between mb-4">
-                    <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                    <div className="w-12 h-12 bg-gray-200 dark:bg-slate-700 rounded-full"></div>
                     {/* Placeholder for bookmark/share icons if needed */}
                   </div>
-                  <div className="h-7 bg-gray-200 rounded w-5/6 mr-auto mb-4"></div>{" "}
+                  <div className="h-7 bg-gray-200 dark:bg-slate-700 rounded w-5/6 mr-auto mb-4"></div>{" "}
                   {/* Arabic text */}
-                  <div className="h-5 bg-gray-200 rounded w-full mb-2"></div>{" "}
+                  <div className="h-5 bg-gray-200 dark:bg-slate-700 rounded w-full mb-2"></div>{" "}
                   {/* Transliteration */}
-                  <div className="h-5 bg-gray-200 rounded w-11/12"></div>{" "}
+                  <div className="h-5 bg-gray-200 dark:bg-slate-700 rounded w-11/12"></div>{" "}
                   {/* Indonesian translation */}
-                  <div className="flex justify-end mt-4 border-t border-gray-100 pt-4">
-                    <div className="h-10 w-32 bg-gray-200 rounded-full"></div>{" "}
+                  <div className="flex justify-end mt-4 border-t border-gray-100 dark:border-slate-700 pt-4">
+                    <div className="h-10 w-32 bg-gray-200 dark:bg-slate-700 rounded-full"></div>{" "}
                     {/* Share button */}
                   </div>
                 </div>
@@ -382,22 +400,22 @@ export default function SurahRead() {
         ) : (
           <div className="animate-fade-in">
             {/* Surah Header Card (similar to SurahList card) */}
-            <div className="bg-white rounded-2xl shadow-sm p-6 mb-8 text-center border border-gray-100">
+            <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 mb-8 text-center border border-gray-100 dark:border-slate-700">
               <div className="flex justify-center mb-4">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 flex items-center justify-center text-white font-bold text-xl shadow-lg">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 dark:from-emerald-600 dark:to-emerald-800 flex items-center justify-center text-white font-bold text-xl shadow-lg">
                   <h1 className="text-4xl font-arabic">{surahData.nama}</h1>
                 </div>
               </div>
 
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
                 {surahData.namaLatin}
                 {/* Use namaLatin */}
               </h2>
-              <p className="text-lg font-medium text-emerald-600">
+              <p className="text-lg font-medium text-emerald-600 dark:text-emerald-400">
                 {surahData.arti}
               </p>
 
-              <div className="flex justify-center space-x-4 text-sm text-gray-500 mt-4 mb-4">
+              <div className="flex justify-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mt-4 mb-4">
                 <span>{surahData.jumlahAyat} Ayat</span>
                 {/* Use jumlahAyat */}
                 <span>•</span>
@@ -408,7 +426,7 @@ export default function SurahRead() {
               {/* Dengarkan button for the entire surah */}
               <button
                 onClick={toggleSurahAudio}
-                className="px-6 py-3 rounded-full bg-emerald-100 hover:bg-emerald-200 transition duration-200 flex items-center justify-center text-emerald-800 font-semibold mx-auto"
+                className="px-6 py-3 rounded-full bg-emerald-100 dark:bg-emerald-900/30 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 transition duration-200 flex items-center justify-center text-emerald-800 dark:text-emerald-400 font-semibold mx-auto"
                 aria-label={
                   isPlayingAudio ? "Jeda Audio Surah" : "Dengarkan Surah"
                 }
@@ -433,40 +451,40 @@ export default function SurahRead() {
               {surahRead.map((item, index) => (
                 <div
                   key={index}
-                  className={`bg-white rounded-2xl shadow-sm overflow-hidden transition-all duration-300
+                  className={`bg-white dark:bg-slate-800 rounded-2xl shadow-sm overflow-hidden transition-all duration-300
                     ${
                       activeVerse === index
                         ? "ring-2 ring-emerald-500 shadow-xl"
-                        : "hover:shadow-md border border-gray-100 hover:border-emerald-200"
+                        : "hover:shadow-md border border-gray-100 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-800"
                     }`}
                 >
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
-                      <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-emerald-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md">
+                      <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-emerald-500 to-blue-500 dark:from-emerald-600 dark:to-emerald-800 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-md">
                         {convertToArabicNumbers(item.nomorAyat)}
                         {/* Use nomorAyat */}
                       </div>
                       {/* Bookmark button per ayat (was here) */}
                     </div>
-                    <p className="text-right text-3xl font-arabic leading-loose text-gray-800 mb-4">
+                    <p className="text-right text-3xl font-arabic leading-loose text-gray-800 dark:text-gray-100 mb-4">
                       {item.teksArab}
                       {/* Use teksArab */}
                     </p>
 
                     <div className="flex flex-col gap-2 mb-3">
-                      <p className="text-gray-700">
+                      <p className="text-gray-700 dark:text-gray-200">
                         <RawHTML>{item.teksLatin}</RawHTML>
                         {/* Use teksLatin */}
                       </p>
-                      <p className="text-gray-600 italic">
+                      <p className="text-gray-600 dark:text-gray-400 italic">
                         {item.teksIndonesia}
                       </p>
                       {/* Use teksIndonesia */}
                     </div>
 
-                    <div className="flex justify-end space-x-3 mt-4 border-t border-gray-100 pt-4">
+                    <div className="flex justify-end space-x-3 mt-4 border-t border-gray-100 dark:border-slate-700 pt-4">
                       <button
-                        className="px-4 py-2 rounded-full bg-blue-50 hover:bg-blue-100 transition duration-200 flex items-center text-blue-700 font-medium"
+                        className="px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition duration-200 flex items-center text-blue-700 dark:text-blue-400 font-medium"
                         aria-label="Bagikan ayat"
                       >
                         <FiShare2 className="h-5 w-5 mr-2" />
@@ -482,7 +500,7 @@ export default function SurahRead() {
       </main>
 
       {/* Navigation Footer */}
-      <footer className="sticky bottom-0 bg-white border-t border-gray-100 shadow-inner py-3 mt-8">
+      <footer className="sticky bottom-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-t border-gray-100 dark:border-slate-800 shadow-inner py-3 mt-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between">
           <button
             onClick={() => navigateSurah(-1)}
@@ -492,7 +510,7 @@ export default function SurahRead() {
               !surahData.suratSebelumnya ||
               surahData.suratSebelumnya === false
             }
-            className="px-6 py-3 rounded-full bg-gray-100 hover:bg-gray-200 transition duration-200 flex items-center text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 rounded-full bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition duration-200 flex items-center text-gray-700 dark:text-gray-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <FiChevronLeft className="h-5 w-5 mr-2" />
             Sebelumnya
@@ -506,7 +524,7 @@ export default function SurahRead() {
               !surahData.suratSelanjutnya ||
               surahData.suratSelanjutnya === false
             }
-            className="px-6 py-3 rounded-full bg-gray-100 hover:bg-gray-200 transition duration-200 flex items-center text-gray-700 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-3 rounded-full bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition duration-200 flex items-center text-gray-700 dark:text-gray-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Selanjutnya
             <FiChevronRight className="h-5 w-5 ml-2" />

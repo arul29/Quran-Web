@@ -5,7 +5,7 @@ module.exports = {
     "./src/**/*.{js,jsx,ts,tsx}",
     "./public/index.html",
   ],
-  darkMode: "media", // atau 'class' tergantung kebutuhan Anda
+  darkMode: "class", // Menggunakan class strategy agar bisa di-toggle manual
   theme: {
     extend: {
       // Tambahkan konfigurasi fontFamily di sini

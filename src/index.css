@@ -5,6 +5,25 @@
 @tailwind utilities;
 
 /* Anda tidak perlu @font-face lagi jika menggunakan @import atau <link> */
+@layer base {
+  body {
+    @apply transition-colors duration-300;
+  }
+}
+
+/* Custom Scrollbar for Dark Mode */
+.dark ::-webkit-scrollbar {
+  width: 10px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  @apply bg-slate-900;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-slate-700 rounded-full border-2 border-slate-900 hover:bg-slate-600;
+}
+
 .font-arabic {
   font-family: "Amiri", "Traditional Arabic", "Times New Roman", serif;
 }
