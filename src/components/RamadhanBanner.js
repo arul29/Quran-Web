@@ -92,7 +92,7 @@ export default function RamadhanBanner() {
               <h2 className="text-2xl md:text-3xl font-bold text-white mb-6 leading-tight">
                 Menuju Bulan Suci Ramadhan
               </h2>
-              <div className="flex flex-wrap justify-center md:justify-start gap-4">
+              <div className="grid grid-cols-4 md:flex gap-2 md:gap-4">
                 {[
                   { label: "Hari", value: timeLeft.days },
                   { label: "Jam", value: timeLeft.hours },
@@ -101,12 +101,12 @@ export default function RamadhanBanner() {
                 ].map((item, i) => (
                   <div
                     key={i}
-                    className="flex flex-col items-center bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-3 min-w-[70px] transition-transform hover:scale-105"
+                    className="flex flex-col items-center bg-white/10 backdrop-blur-sm border border-white/10 rounded-2xl p-2 md:p-3 min-w-[60px] md:min-w-[70px] transition-transform hover:scale-105"
                   >
-                    <span className="text-2xl md:text-3xl font-black text-white">
+                    <span className="text-xl md:text-3xl font-black text-white">
                       {item.value}
                     </span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-200 mt-1">
+                    <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-emerald-200 mt-1">
                       {item.label}
                     </span>
                   </div>

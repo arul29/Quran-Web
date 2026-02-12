@@ -155,8 +155,8 @@ export default function SurahList() {
           </h1>
 
           <p className="text-lg text-emerald-100/60 max-w-xl mx-auto leading-relaxed animate-fade-in delay-100 px-4">
-            Al-Qur'an digital terlengkap dengan terjemahan, tafsir, dan audio
-            jernih dalam genggaman Anda.
+            Al-Qur'an digital Indonesia lengkap dengan terjemahan, tafsir, dan
+            audio jernih dalam genggaman Anda.
           </p>
 
           <div className="flex items-center justify-center pt-4 animate-fade-in delay-200">
