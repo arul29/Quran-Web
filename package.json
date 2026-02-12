@@ -2,6 +2,9 @@
   "name": "quran-web",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "22.x"
+  },
   "dependencies": {
     "@craco/craco": "^7.1.0",
     "@testing-library/jest-dom": "^5.17.0",
