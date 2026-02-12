@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { convertToArabicNumbers } from "../helpers";
-import { Box, Search, Bookmark, Library, History } from "lucide-react";
+import {
+  Box,
+  Search,
+  Bookmark,
+  Library,
+  History,
+  X,
+  Trash2,
+} from "lucide-react";
 import SEO from "../components/SEO";
 import ThemeToggle from "../components/ThemeToggle";
 
@@ -12,6 +20,7 @@ export default function SurahList() {
   const [bookmark, setBookmark] = useState([]);
   const [viewBookmark, setViewBookmark] = useState(false);
   const [lastRead, setLastRead] = useState(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   const getSurahList = async () => {
     setLoading(true);
@@ -92,6 +101,12 @@ export default function SurahList() {
     }
   };
 
+  const deleteLastRead = () => {
+    localStorage.removeItem("lastRead");
+    setLastRead(null);
+    setShowDeleteConfirm(false);
+  };
+
   useEffect(() => {
     getBookmark();
     getSurahList();
@@ -166,29 +181,50 @@ export default function SurahList() {
 
         {/* Last Read Card */}
         {!viewBookmark && lastRead && (
-          <div className="mb-12 animate-fade-in">
-            <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-emerald-800 rounded-3xl p-8 shadow-xl shadow-emerald-500/20 text-white">
-              <div className="absolute top-0 right-0 p-4 opacity-10">
-                <History size={150} strokeWidth={1} />
+          <div className="mb-8 animate-fade-in">
+            <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-teal-800 rounded-3xl p-6 shadow-xl shadow-emerald-500/10 text-white border border-white/5">
+              <div className="absolute top-1/2 -right-4 -translate-y-1/2 opacity-[0.03] pointer-events-none">
+                <History size={120} strokeWidth={1} />
               </div>
+
               <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="flex items-center gap-6">
-                  <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-md">
-                    <History className="h-8 w-8 text-white" strokeWidth={2.5} />
+                <div className="flex items-center gap-5">
+                  <div className="flex-shrink-0 p-3.5 bg-white/10 rounded-2xl backdrop-blur-md border border-white/20 shadow-lg">
+                    <History className="h-6 w-6 text-white" strokeWidth={2.5} />
                   </div>
                   <div>
-                    <h3 className="text-xl font-bold mb-1">Terakhir Dibaca</h3>
-                    <p className="text-white/80 text-lg">
-                      Surah {lastRead.namaLatin} • Ayat {lastRead.nomorAyat}
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-[10px] font-bold uppercase tracking-wider bg-emerald-400/20 text-emerald-300 px-2 py-0.5 rounded-md">
+                        Terakhir Dibaca
+                      </span>
+                    </div>
+                    <h3 className="text-xl font-bold text-white leading-tight">
+                      {lastRead.namaLatin}
+                    </h3>
+                    <p className="text-white/70 text-sm">
+                      Ayat {lastRead.nomorAyat}{" "}
+                      <span className="mx-1 • text-white/30">•</span> Lanjutkan
+                      Membaca
                     </p>
                   </div>
                 </div>
-                <a
-                  href={`/baca/${lastRead.nomorSurah}#verse-${lastRead.nomorAyat}`}
-                  className="px-8 py-3 bg-white text-emerald-700 rounded-full font-bold hover:bg-emerald-50 transition-colors shadow-lg active:scale-95"
-                >
-                  Lanjutkan Membaca
-                </a>
+
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                  <a
+                    href={`/baca/${lastRead.nomorSurah}#verse-${lastRead.nomorAyat}`}
+                    className="flex-1 md:flex-none inline-flex items-center justify-center px-6 py-2.5 bg-white text-emerald-800 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-all duration-200 shadow-md active:scale-95"
+                  >
+                    <History className="w-4 h-4 mr-2" strokeWidth={2.5} />
+                    Lanjutkan Membaca
+                  </a>
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="flex-none p-2.5 bg-white/10 hover:bg-red-500/20 border border-white/20 rounded-xl transition-all duration-200 active:scale-95 text-white"
+                    title="Hapus Penanda"
+                  >
+                    <Trash2 className="w-4 h-4" strokeWidth={2.5} />
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -288,6 +324,46 @@ export default function SurahList() {
           )}
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all animate-scale-up">
+            <div className="p-6 text-center">
+              <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-4">
+                <Trash2
+                  className="w-8 h-8 text-red-600 dark:text-red-400"
+                  strokeWidth={2.5}
+                />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
+                Hapus Terakhir Dibaca?
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Anda akan menghapus penanda terakhir dibaca di{" "}
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                  Surah {lastRead?.namaLatin} Ayat {lastRead?.nomorAyat}
+                </span>
+                . Tindakan ini tidak dapat dibatalkan.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className="flex-1 px-6 py-3 rounded-full bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors text-gray-700 dark:text-gray-200 font-semibold"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={deleteLastRead}
+                  className="flex-1 px-6 py-3 rounded-full bg-red-600 hover:bg-red-700 transition-colors text-white font-semibold shadow-lg shadow-red-600/20 active:scale-95"
+                >
+                  Hapus
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
