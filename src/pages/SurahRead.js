@@ -127,22 +127,6 @@ export default function SurahRead() {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
 
-    // Check for hash and scroll
-    if (window.location.hash) {
-      setTimeout(() => {
-        const id = window.location.hash.replace("#", "");
-        const element = document.getElementById(id);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth", block: "center" });
-          // Highlight effect
-          element.classList.add("ring-4", "ring-emerald-500/50");
-          setTimeout(() => {
-            element.classList.remove("ring-4", "ring-emerald-500/50");
-          }, 3000);
-        }
-      }, 1000); // Give time for content to render
-    }
-
     return () => {
       window.removeEventListener("scroll", handleScroll);
       if (audioRef.current) {
@@ -155,6 +139,40 @@ export default function SurahRead() {
       }
     };
   }, [no, getSurahData]);
+
+  // Separate useEffect for scrolling to verse AFTER data is fully loaded
+  useEffect(() => {
+    if (!loading && surahRead.length > 0 && window.location.hash) {
+      // Small delay to ensure DOM is fully rendered
+      const timer = setTimeout(() => {
+        const id = window.location.hash.replace("#", "");
+        const element = document.getElementById(id);
+        if (element) {
+          // Scroll with offset for better visibility
+          const yOffset = -100;
+          const y =
+            element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          window.scrollTo({ top: y, behavior: "smooth" });
+
+          // Highlight effect
+          element.classList.add(
+            "ring-4",
+            "ring-emerald-500/50",
+            "animate-pulse",
+          );
+          setTimeout(() => {
+            element.classList.remove(
+              "ring-4",
+              "ring-emerald-500/50",
+              "animate-pulse",
+            );
+          }, 3000);
+        }
+      }, 300);
+
+      return () => clearTimeout(timer);
+    }
+  }, [loading, surahRead]);
 
   const navigateSurah = (direction) => {
     if (audioRef.current) {
