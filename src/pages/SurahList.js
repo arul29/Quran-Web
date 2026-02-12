@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { convertToArabicNumbers } from "../helpers";
-import { Box, Search, Bookmark, Library } from "lucide-react";
+import { Box, Search, Bookmark, Library, History } from "lucide-react";
 import SEO from "../components/SEO";
 import ThemeToggle from "../components/ThemeToggle";
 
@@ -11,6 +11,7 @@ export default function SurahList() {
   const [surahAll, setSurahAll] = useState([]);
   const [bookmark, setBookmark] = useState([]);
   const [viewBookmark, setViewBookmark] = useState(false);
+  const [lastRead, setLastRead] = useState(null);
 
   const getSurahList = async () => {
     setLoading(true);
@@ -84,9 +85,17 @@ export default function SurahList() {
     return bookmark.filter((bookmark) => item_id === bookmark.nomor).length > 0;
   };
 
+  const getLastRead = () => {
+    const data = localStorage.getItem("lastRead");
+    if (data) {
+      setLastRead(JSON.parse(data));
+    }
+  };
+
   useEffect(() => {
     getBookmark();
     getSurahList();
+    getLastRead();
   }, []);
 
   return (
@@ -154,6 +163,36 @@ export default function SurahList() {
             </button>
           </div>
         </div>
+
+        {/* Last Read Card */}
+        {!viewBookmark && lastRead && (
+          <div className="mb-12 animate-fade-in">
+            <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-emerald-800 rounded-3xl p-8 shadow-xl shadow-emerald-500/20 text-white">
+              <div className="absolute top-0 right-0 p-4 opacity-10">
+                <History size={150} strokeWidth={1} />
+              </div>
+              <div className="relative flex flex-col md:flex-row items-center justify-between gap-6">
+                <div className="flex items-center gap-6">
+                  <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-md">
+                    <History className="h-8 w-8 text-white" strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold mb-1">Terakhir Dibaca</h3>
+                    <p className="text-white/80 text-lg">
+                      Surah {lastRead.namaLatin} • Ayat {lastRead.nomorAyat}
+                    </p>
+                  </div>
+                </div>
+                <a
+                  href={`/baca/${lastRead.nomorSurah}#verse-${lastRead.nomorAyat}`}
+                  className="px-8 py-3 bg-white text-emerald-700 rounded-full font-bold hover:bg-emerald-50 transition-colors shadow-lg active:scale-95"
+                >
+                  Lanjutkan Membaca
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Surah Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

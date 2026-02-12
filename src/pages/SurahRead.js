@@ -13,6 +13,7 @@ import {
   Pause,
   Play,
   Box,
+  History,
 } from "lucide-react";
 
 import { convertToArabicNumbers, RawHTML } from "../helpers";
@@ -110,12 +111,39 @@ export default function SurahRead() {
     );
   };
 
+  const saveLastRead = (nomorAyat) => {
+    const lastReadData = {
+      nomorSurah: no,
+      namaLatin: surahData.namaLatin,
+      nomorAyat: nomorAyat,
+      timestamp: new Date().getTime(),
+    };
+    localStorage.setItem("lastRead", JSON.stringify(lastReadData));
+    alert(`Berhasil menandai Ayat ${nomorAyat} sebagai terakhir dibaca!`);
+  };
+
   useEffect(() => {
     getBookmark();
     getSurahData();
 
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
+
+    // Check for hash and scroll
+    if (window.location.hash) {
+      setTimeout(() => {
+        const id = window.location.hash.replace("#", "");
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+          // Highlight effect
+          element.classList.add("ring-4", "ring-emerald-500/50");
+          setTimeout(() => {
+            element.classList.remove("ring-4", "ring-emerald-500/50");
+          }, 3000);
+        }
+      }, 1000); // Give time for content to render
+    }
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -473,6 +501,17 @@ export default function SurahRead() {
                           strokeWidth={2.5}
                         />
                         <span className="hidden sm:inline">Tafsir</span>
+                      </button>
+                      <button
+                        onClick={() => saveLastRead(item.nomorAyat)}
+                        className="px-3 sm:px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition duration-200 flex items-center text-blue-700 dark:text-blue-400 font-medium"
+                        aria-label="Tandai terakhir dibaca"
+                      >
+                        <History
+                          className="h-5 w-5 sm:mr-2"
+                          strokeWidth={2.5}
+                        />
+                        <span className="hidden sm:inline">Tandai</span>
                       </button>
                       <button
                         onClick={() =>
