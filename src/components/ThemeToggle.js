@@ -26,7 +26,9 @@ export default function ThemeToggle({ isScrolled, className = "" }) {
       className={`p-2 rounded-full transition-all duration-300 group ${
         isScrolled
           ? "bg-white dark:bg-slate-800 shadow-md text-emerald-600 dark:text-emerald-400"
-          : "bg-white/30 text-white hover:bg-white/50"
+          : darkMode
+            ? "bg-white/10 text-white hover:bg-white/20"
+            : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-100"
       } ${className}`}
       aria-label="Toggle Dark Mode"
     >
