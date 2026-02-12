@@ -9,7 +9,9 @@ import {
   History,
   X,
   Trash2,
+  HelpCircle,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import ThemeToggle from "../components/ThemeToggle";
 
@@ -122,7 +124,14 @@ export default function SurahList() {
       />
       {/* Header Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-blue-600 dark:from-emerald-900 dark:to-slate-900">
-        <div className="absolute top-4 right-4 z-50">
+        <div className="absolute top-4 right-4 z-50 flex items-center gap-3">
+          <Link
+            to="/bantuan"
+            className="p-2 bg-white/20 hover:bg-white/30 rounded-xl backdrop-blur-md text-white transition-all active:scale-95 group"
+            title="Pusat Bantuan"
+          >
+            <HelpCircle className="w-6 h-6 group-hover:rotate-12 transition-transform" />
+          </Link>
           <ThemeToggle />
         </div>
         <div className="absolute inset-0 bg-black/10"></div>
@@ -154,8 +163,8 @@ export default function SurahList() {
             </div>
           </div>
 
-          {/* Bookmark Toggle */}
-          <div className="text-center mt-8">
+          {/* Action Buttons */}
+          <div className="flex flex-wrap justify-center items-center gap-4 mt-8">
             <button
               onClick={() => {
                 setViewBookmark(!viewBookmark);
@@ -176,6 +185,17 @@ export default function SurahList() {
               )}
               {viewBookmark ? "Lihat Semua Surah" : "Lihat Bookmark"}
             </button>
+
+            <Link
+              to="/bantuan"
+              className="inline-flex items-center px-6 py-3 rounded-full bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition-all duration-200 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium group"
+            >
+              <HelpCircle
+                className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform"
+                strokeWidth={2.5}
+              />
+              Pusat Bantuan
+            </Link>
           </div>
         </div>
 
