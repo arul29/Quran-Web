@@ -11,7 +11,6 @@ import {
   BookOpen,
   Volume2,
   Pause,
-  Play,
   Box,
   History,
 } from "lucide-react";
@@ -26,7 +25,6 @@ export default function SurahRead() {
   const [loading, setLoading] = useState(true);
   const [surahData, setSurahData] = useState({});
   const [surahRead, setSurahRead] = useState([]);
-  const [activeVerse, setActiveVerse] = useState(null);
   const [playingVerseId, setPlayingVerseId] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [bookmark, setBookmark] = useState([]);
