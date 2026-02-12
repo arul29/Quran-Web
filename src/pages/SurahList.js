@@ -15,6 +15,8 @@ import {
 import { Link } from "react-router-dom";
 import SEO from "../components/SEO";
 import ThemeToggle from "../components/ThemeToggle";
+import RamadhanBanner from "../components/RamadhanBanner";
+import PrayerTimes from "../components/PrayerTimes";
 
 export default function SurahList() {
   const [loading, setLoading] = useState(false);
@@ -160,6 +162,15 @@ export default function SurahList() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {!viewBookmark && (
+          <>
+            <RamadhanBanner />
+            <div className="mb-12">
+              <PrayerTimes />
+            </div>
+          </>
+        )}
+
         {/* Search & Filter Section */}
         <div className="mb-12">
           <div className="max-w-2xl mx-auto">
@@ -263,7 +274,7 @@ export default function SurahList() {
           </div>
         )}
 
-        {/* Surah Grid */}
+        {/* Surah List Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
             Array.from({ length: 6 }).map((_, index) => (
