@@ -13,6 +13,12 @@ import {
   Pause,
   Box,
   History,
+  X,
+  MessageCircle,
+  Twitter,
+  Facebook,
+  Link2,
+  ExternalLink,
 } from "lucide-react";
 
 import { convertToArabicNumbers, RawHTML } from "../helpers";
@@ -46,6 +52,9 @@ export default function SurahRead() {
   const [tafsirData, setTafsirData] = useState([]);
   const [selectedTafsir, setSelectedTafsir] = useState(null);
   const [isTafsirOpen, setIsTafsirOpen] = useState(false);
+
+  // State untuk Share
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
   const headerRef = useRef(null);
 
@@ -293,6 +302,59 @@ export default function SurahRead() {
       });
   };
 
+  const handleShare = async () => {
+    const shareData = {
+      title: `Surah ${surahData.namaLatin} - Al-Qur'an Indonesia`,
+      text: `Baca Surah ${surahData.namaLatin} (${surahData.arti}) - ${surahData.jumlahAyat} Ayat di Al-Qur'an Indonesia.`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        if (error.name !== "AbortError") {
+          setIsShareModalOpen(true);
+        }
+      }
+    } else {
+      setIsShareModalOpen(true);
+    }
+  };
+
+  const shareToSocial = (platform) => {
+    const url = encodeURIComponent(window.location.href);
+    const text = encodeURIComponent(
+      `Baca Surah ${surahData.namaLatin} di Al-Qur'an Indonesia`,
+    );
+    let shareUrl = "";
+
+    switch (platform) {
+      case "wa":
+        shareUrl = `https://wa.me/?text=${text}%20${url}`;
+        break;
+      case "x":
+        shareUrl = `https://twitter.com/intent/tweet?text=${text}&url=${url}`;
+        break;
+      case "fb":
+        shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+        break;
+      default:
+        break;
+    }
+
+    if (shareUrl) {
+      window.open(shareUrl, "_blank", "noopener,noreferrer");
+    }
+    setIsShareModalOpen(false);
+  };
+
+  const copyPageLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    showToast("Link berhasil disalin!", "success");
+    setIsShareModalOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300">
       <SEO
@@ -381,11 +443,12 @@ export default function SurahRead() {
               />
             </button>
             <button
-              className={`p-2 rounded-full ${isScrolled ? "bg-white dark:bg-slate-800 shadow-md" : "bg-white/30"} hover:bg-white/50 transition duration-200`}
+              onClick={handleShare}
+              className={`p-2 rounded-full ${isScrolled ? "bg-white dark:bg-slate-800 shadow-md" : "bg-white/30"} hover:bg-white/50 transition duration-200 group`}
               aria-label="Bagikan"
             >
               <Share2
-                className={`h-6 w-6 ${isScrolled ? "text-emerald-600 dark:text-emerald-400" : "text-white"}`}
+                className={`h-6 w-6 ${isScrolled ? "text-emerald-600 dark:text-emerald-400" : "text-white"} group-hover:scale-110 transition-transform`}
                 strokeWidth={2.5}
               />
             </button>
@@ -630,6 +693,97 @@ export default function SurahRead() {
               >
                 Tutup
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal */}
+      {isShareModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-4">
+          <div
+            className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-fade-in"
+            onClick={() => setIsShareModalOpen(false)}
+          ></div>
+          <div className="relative bg-white dark:bg-slate-800 rounded-[2rem] shadow-2xl w-full max-w-sm overflow-hidden animate-slide-up border border-white/10">
+            <div className="p-6 border-b border-gray-100 dark:border-slate-700 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                Bagikan Surah
+              </h3>
+              <button
+                onClick={() => setIsShareModalOpen(false)}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full transition-colors"
+              >
+                <X size={20} className="text-gray-500 dark:text-gray-400" />
+              </button>
+            </div>
+
+            <div className="p-8">
+              <div className="flex justify-center mb-8">
+                <div className="p-4 bg-emerald-50 dark:bg-emerald-900/30 rounded-3xl">
+                  <Share2
+                    className="w-10 h-10 text-emerald-600 dark:text-emerald-400"
+                    strokeWidth={2.5}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => shareToSocial("wa")}
+                  className="flex flex-col items-center gap-3 p-4 rounded-2xl hover:bg-emerald-50 dark:hover:bg-emerald-900/20 transition-all group"
+                >
+                  <div className="w-12 h-12 flex items-center justify-center bg-green-500 text-white rounded-full shadow-lg shadow-green-500/20 group-hover:scale-110 transition-transform">
+                    <MessageCircle size={24} fill="currentColor" />
+                  </div>
+                  <span className="text-sm font-semibold dark:text-white">
+                    WhatsApp
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => shareToSocial("x")}
+                  className="flex flex-col items-center gap-3 p-4 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all group"
+                >
+                  <div className="w-12 h-12 flex items-center justify-center bg-slate-900 text-white rounded-full shadow-lg shadow-slate-900/20 group-hover:scale-110 transition-transform">
+                    <Twitter size={24} fill="currentColor" />
+                  </div>
+                  <span className="text-sm font-semibold dark:text-white">
+                    X (Twitter)
+                  </span>
+                </button>
+
+                <button
+                  onClick={() => shareToSocial("fb")}
+                  className="flex flex-col items-center gap-3 p-4 rounded-2xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all group"
+                >
+                  <div className="w-12 h-12 flex items-center justify-center bg-blue-600 text-white rounded-full shadow-lg shadow-blue-600/20 group-hover:scale-110 transition-transform">
+                    <Facebook size={24} fill="currentColor" />
+                  </div>
+                  <span className="text-sm font-semibold dark:text-white">
+                    Facebook
+                  </span>
+                </button>
+
+                <button
+                  onClick={copyPageLink}
+                  className="flex flex-col items-center gap-3 p-4 rounded-2xl hover:bg-amber-50 dark:hover:bg-amber-900/20 transition-all group"
+                >
+                  <div className="w-12 h-12 flex items-center justify-center bg-amber-500 text-white rounded-full shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform">
+                    <Link2 size={24} />
+                  </div>
+                  <span className="text-sm font-semibold dark:text-white">
+                    Salin Link
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-slate-900/50 p-6 text-center">
+              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium italic">
+                "Barangsiapa yang menunjuki kepada kebaikan, maka baginya pahala
+                seperti pahala orang yang mengerjakannya." (HR. Muslim)
+              </p>
             </div>
           </div>
         </div>
