@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { convertToArabicNumbers } from "../helpers";
-import { FaBoxOpen } from "react-icons/fa";
+import { Box, Search, Bookmark, Library } from "lucide-react";
 import SEO from "../components/SEO";
 import ThemeToggle from "../components/ThemeToggle";
 
@@ -15,7 +15,7 @@ export default function SurahList() {
   const getSurahList = async () => {
     setLoading(true);
     await axios
-      .get(`https://equran.id/api/v2/surat`) // Pastikan ini sudah v2
+      .get(`https://equran.id/api/v2/surat`)
       .then(async (res) => {
         setSurahList(res.data.data);
         setSurahAll(res.data.data);
@@ -56,19 +56,16 @@ export default function SurahList() {
     } else {
       newBookmark = JSON.parse(oldBookmark);
     }
-    // Pastikan properti yang disimpan di bookmark sesuai dengan format yang Anda inginkan
-    // Ini penting agar SurahList bisa menampilkan namaLatin, jumlahAyat, tempatTurun dengan benar
     localStorage.setItem(
       "bookmark",
       JSON.stringify(
         newBookmark.concat({
           nomor: item.nomor,
           nama: item.nama,
-          namaLatin: item.namaLatin, // Simpan namaLatin
-          jumlahAyat: item.jumlahAyat, // Simpan jumlahAyat
-          tempatTurun: item.tempatTurun, // Simpan tempatTurun
+          namaLatin: item.namaLatin,
+          jumlahAyat: item.jumlahAyat,
+          tempatTurun: item.tempatTurun,
           arti: item.arti,
-          // Jika Anda perlu menyimpan audioFull atau deskripsi, tambahkan di sini
         }),
       ),
     );
@@ -122,19 +119,7 @@ export default function SurahList() {
           <div className="max-w-2xl mx-auto">
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                <svg
-                  className="h-5 w-5 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                  />
-                </svg>
+                <Search className="h-5 w-5 text-gray-400" strokeWidth={2.5} />
               </div>
               <input
                 onChange={searchSurah}
@@ -152,15 +137,19 @@ export default function SurahList() {
                 setViewBookmark(!viewBookmark);
                 viewBookmark ? setSurahList(surahAll) : setSurahList(bookmark);
               }}
-              className="inline-flex items-center px-6 py-3 rounded-full bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition-all duration-200 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium"
+              className="inline-flex items-center px-6 py-3 rounded-full bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition-all duration-200 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium group"
             >
-              <svg
-                className="w-5 h-5 mr-2"
-                fill="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z" />
-              </svg>
+              {viewBookmark ? (
+                <Library
+                  className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform"
+                  strokeWidth={2.5}
+                />
+              ) : (
+                <Bookmark
+                  className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform"
+                  strokeWidth={2.5}
+                />
+              )}
               {viewBookmark ? "Lihat Semua Surah" : "Lihat Bookmark"}
             </button>
           </div>
@@ -169,7 +158,6 @@ export default function SurahList() {
         {/* Surah Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {loading ? (
-            // Loading Skeleton
             Array.from({ length: 6 }).map((_, index) => (
               <div
                 key={index}
@@ -188,8 +176,8 @@ export default function SurahList() {
             ))
           ) : surahList.length === 0 ? (
             <div className="col-span-full text-center py-16">
-              <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-                <FaBoxOpen className="w-12 h-12 text-gray-400" />
+              <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 dark:bg-slate-800/50 rounded-full flex items-center justify-center">
+                <Box className="w-12 h-12 text-gray-400" strokeWidth={1.5} />
               </div>
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                 Tidak ada data ditemukan
@@ -222,23 +210,19 @@ export default function SurahList() {
                         }}
                         className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors duration-200"
                       >
-                        <svg
-                          className="w-6 h-6"
-                          fill={isBookmark(item.nomor) ? "#059669" : "none"}
-                          stroke={
-                            isBookmark(item.nomor) ? "#059669" : "#9ca3af"
-                          }
-                          strokeWidth={1}
-                          viewBox="0 0 24 24"
-                        >
-                          <path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z" />
-                        </svg>
+                        <Bookmark
+                          className={`w-6 h-6 transition-all duration-300 ${
+                            isBookmark(item.nomor)
+                              ? "fill-emerald-600 text-emerald-600"
+                              : "text-gray-400"
+                          }`}
+                          strokeWidth={2}
+                        />
                       </button>
                     )}
                   </div>
 
                   <a href={`/baca/${item.nomor}`} className="block">
-                    {/* MODIFIKASI DI SINI: Tambahkan dir="rtl" dan text-right */}
                     <h3
                       className="text-2xl font-arabic font-bold text-gray-900 dark:text-white mb-2 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors duration-200 text-right"
                       dir="rtl"

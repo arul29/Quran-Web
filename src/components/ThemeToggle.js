@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FiSun, FiMoon } from "react-icons/fi";
+import { Sun, Moon } from "lucide-react";
 
 export default function ThemeToggle({ isScrolled, className = "" }) {
   const [darkMode, setDarkMode] = useState(() => {
@@ -31,9 +31,15 @@ export default function ThemeToggle({ isScrolled, className = "" }) {
       aria-label="Toggle Dark Mode"
     >
       {darkMode ? (
-        <FiSun className="w-6 h-6 group-hover:rotate-45 transition-transform duration-500" />
+        <Sun
+          className="w-6 h-6 group-hover:rotate-45 transition-transform duration-500"
+          strokeWidth={2.5}
+        />
       ) : (
-        <FiMoon className="w-6 h-6 group-hover:-rotate-12 transition-transform duration-500" />
+        <Moon
+          className="w-6 h-6 group-hover:-rotate-12 transition-transform duration-500"
+          strokeWidth={2.5}
+        />
       )}
     </button>
   );
