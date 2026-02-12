@@ -11,6 +11,8 @@ import {
   FiBookmark, // Outline bookmark icon
   FiVolume2, // Play icon
   FiPause, // Pause icon
+  FiCopy, // Copy icon
+  FiBookOpen, // Book open icon for Tafsir
 } from "react-icons/fi";
 import { BsBookmarkFill } from "react-icons/bs"; // Filled bookmark icon
 
@@ -33,18 +35,30 @@ export default function SurahRead() {
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const audioRef = useRef(null); // Ref untuk elemen Audio
 
+  // State untuk Tafsir
+  const [tafsirData, setTafsirData] = useState([]);
+  const [selectedTafsir, setSelectedTafsir] = useState(null);
+  const [isTafsirOpen, setIsTafsirOpen] = useState(false);
+
   const headerRef = useRef(null);
 
   // Wrap getSurahData in useCallback to make it a stable function
   const getSurahData = useCallback(async () => {
     try {
       setLoading(true);
+      // Fetch Surah Details
       const res = await axios.get(`https://equran.id/api/v2/surat/${no}`);
-      // Access res.data.data for surah details
       const data = res.data.data;
       setSurahData(data);
-      setSurahRead(data.ayat); // Access data.ayat for verses
+      setSurahRead(data.ayat);
       document.title = `${data.namaLatin} - Al-Qur'an`; // Use namaLatin
+
+      // Fetch Tafsir Details
+      const tafsirRes = await axios.get(
+        `https://equran.id/api/v2/tafsir/${no}`,
+      );
+      const tafsirResult = tafsirRes.data.data;
+      setTafsirData(tafsirResult.tafsir);
 
       // Inisialisasi Audio object setelah data surah didapatkan
       // Check if audioRef.current exists before updating src
@@ -68,6 +82,7 @@ export default function SurahRead() {
       document.title = "Al-Qur'an Indonesia";
       setSurahData({});
       setSurahRead([]);
+      setTafsirData([]);
       // Ensure audio is stopped if there's an error
       if (audioRef.current) {
         audioRef.current.pause();
@@ -203,6 +218,31 @@ export default function SurahRead() {
       );
       setIsPlayingAudio(false);
     }
+  };
+
+  // Function to open Tafsir modal
+  const openTafsir = (ayatNumber) => {
+    const tafsirAyat = tafsirData.find((tafsir) => tafsir.ayat === ayatNumber);
+    if (tafsirAyat) {
+      setSelectedTafsir({ nomor: ayatNumber, teks: tafsirAyat.teks });
+      setIsTafsirOpen(true);
+    } else {
+      alert("Tafsir untuk ayat ini tidak ditemukan.");
+    }
+  };
+
+  // Function to copy verse to clipboard
+  const copyVerse = (arabicText, indonesianText, verseNumber) => {
+    const textToCopy = `${arabicText}\n\n${indonesianText}\n\n(QS. ${surahData.namaLatin}:${verseNumber})`;
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => {
+        alert("Ayat berhasil disalin!");
+      })
+      .catch((err) => {
+        console.error("Gagal menyalin ayat:", err);
+        alert("Gagal menyalin ayat.");
+      });
   };
 
   return (
@@ -484,11 +524,26 @@ export default function SurahRead() {
 
                     <div className="flex justify-end space-x-3 mt-4 border-t border-gray-100 dark:border-slate-700 pt-4">
                       <button
-                        className="px-4 py-2 rounded-full bg-blue-50 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition duration-200 flex items-center text-blue-700 dark:text-blue-400 font-medium"
-                        aria-label="Bagikan ayat"
+                        onClick={() => openTafsir(item.nomorAyat)}
+                        className="px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition duration-200 flex items-center text-emerald-700 dark:text-emerald-400 font-medium"
+                        aria-label="Lihat tafsir"
                       >
-                        <FiShare2 className="h-5 w-5 mr-2" />
-                        Bagikan
+                        <FiBookOpen className="w-5 h-5 mr-2" />
+                        Tafsir
+                      </button>
+                      <button
+                        onClick={() =>
+                          copyVerse(
+                            item.teksArab,
+                            item.teksIndonesia,
+                            item.nomorAyat,
+                          )
+                        }
+                        className="px-4 py-2 rounded-full bg-gray-50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 transition duration-200 flex items-center text-gray-700 dark:text-gray-200 font-medium"
+                        aria-label="Salin ayat"
+                      >
+                        <FiCopy className="h-5 w-5 mr-2" />
+                        Salin
                       </button>
                     </div>
                   </div>
@@ -531,6 +586,50 @@ export default function SurahRead() {
           </button>
         </div>
       </footer>
+
+      {/* Tafsir Modal */}
+      {isTafsirOpen && selectedTafsir && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col transform transition-all animate-scale-up">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-100 dark:border-slate-800 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 z-10">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Tafsir Ayat {selectedTafsir.nomor}
+                </h3>
+                <p className="text-sm text-emerald-600 dark:text-emerald-400 font-medium">
+                  {surahData.namaLatin}
+                </p>
+              </div>
+              <button
+                onClick={() => setIsTafsirOpen(false)}
+                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+              >
+                <FiArrowLeft className="w-6 h-6 rotate-90 text-gray-500" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto custom-scrollbar bg-slate-50/50 dark:bg-slate-900/50">
+              <div className="prose prose-emerald dark:prose-invert max-w-none">
+                <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line text-lg">
+                  {selectedTafsir.teks}
+                </p>
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-gray-100 dark:border-slate-800 flex justify-end">
+              <button
+                onClick={() => setIsTafsirOpen(false)}
+                className="px-8 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 transition-all text-white font-semibold shadow-lg shadow-emerald-600/20 active:scale-95"
+              >
+                Tutup
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
