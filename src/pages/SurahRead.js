@@ -28,12 +28,14 @@ export default function SurahRead() {
   const [surahData, setSurahData] = useState({});
   const [surahRead, setSurahRead] = useState([]);
   const [activeVerse, setActiveVerse] = useState(null); // Keep for potential future use
+  const [playingVerseId, setPlayingVerseId] = useState(null); // Current playing verse ID
   const [isScrolled, setIsScrolled] = useState(false);
   const [bookmark, setBookmark] = useState([]);
 
   // State untuk audio
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  const audioRef = useRef(null); // Ref untuk elemen Audio
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false); // Full surah audio
+  const audioRef = useRef(null); // Ref untuk elemen Audio (full surah)
+  const verseAudioRef = useRef(null); // Ref for verse-specific audio
 
   // State untuk Tafsir
   const [tafsirData, setTafsirData] = useState([]);
@@ -148,6 +150,10 @@ export default function SurahRead() {
         audioRef.current.pause();
         audioRef.current = null;
       }
+      if (verseAudioRef.current) {
+        verseAudioRef.current.pause();
+        verseAudioRef.current = null;
+      }
     };
   }, [no, getSurahData]); // Depend on `no` and `getSurahData`
 
@@ -156,6 +162,10 @@ export default function SurahRead() {
     if (audioRef.current) {
       audioRef.current.pause();
       setIsPlayingAudio(false);
+    }
+    if (verseAudioRef.current) {
+      verseAudioRef.current.pause();
+      setPlayingVerseId(null);
     }
 
     const newNo = parseInt(no) + direction;
@@ -208,6 +218,11 @@ export default function SurahRead() {
       if (isPlayingAudio) {
         audioRef.current.pause();
       } else {
+        // Stop verse audio if playing
+        if (verseAudioRef.current) {
+          verseAudioRef.current.pause();
+          setPlayingVerseId(null);
+        }
         await audioRef.current.play();
       }
       setIsPlayingAudio(!isPlayingAudio);
@@ -228,6 +243,31 @@ export default function SurahRead() {
       setIsTafsirOpen(true);
     } else {
       alert("Tafsir untuk ayat ini tidak ditemukan.");
+    }
+  };
+
+  // Function to play audio per verse
+  const toggleVerseAudio = (audioUrl, verseId) => {
+    // Stop full surah audio if playing
+    if (isPlayingAudio) {
+      audioRef.current.pause();
+      setIsPlayingAudio(false);
+    }
+
+    if (playingVerseId === verseId) {
+      verseAudioRef.current.pause();
+      setPlayingVerseId(null);
+    } else {
+      if (verseAudioRef.current) {
+        verseAudioRef.current.pause();
+      }
+      verseAudioRef.current = new Audio(audioUrl);
+      verseAudioRef.current.play();
+      setPlayingVerseId(verseId);
+
+      verseAudioRef.current.onended = () => {
+        setPlayingVerseId(null);
+      };
     }
   };
 
@@ -497,12 +537,12 @@ export default function SurahRead() {
               {surahRead.map((item, index) => (
                 <div
                   key={index}
-                  className={`bg-white dark:bg-slate-800 rounded-2xl shadow-sm overflow-hidden transition-all duration-300
-                    ${
-                      activeVerse === index
-                        ? "ring-2 ring-emerald-500 shadow-xl"
-                        : "hover:shadow-md border border-gray-100 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-800"
-                    }`}
+                  id={`verse-${item.nomorAyat}`}
+                  className={`relative group bg-white dark:bg-slate-800 rounded-3xl p-6 sm:p-8 shadow-sm border transition-all duration-500 ${
+                    playingVerseId === item.nomorAyat
+                      ? "border-emerald-500 ring-2 ring-emerald-500/20 shadow-emerald-500/10 dark:shadow-emerald-500/5 translate-x-1"
+                      : "border-gray-100 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-800"
+                  }`}
                 >
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -528,14 +568,41 @@ export default function SurahRead() {
                       {/* Use teksIndonesia */}
                     </div>
 
-                    <div className="flex justify-end space-x-3 mt-4 border-t border-gray-100 dark:border-slate-700 pt-4">
+                    <div className="flex flex-wrap justify-end gap-3 mt-4 border-t border-gray-100 dark:border-slate-700 pt-4">
+                      <button
+                        onClick={() =>
+                          toggleVerseAudio(item.audio["05"], item.nomorAyat)
+                        }
+                        className={`px-3 sm:px-4 py-2 rounded-full transition duration-200 flex items-center font-medium ${
+                          playingVerseId === item.nomorAyat
+                            ? "bg-red-500 text-white shadow-lg shadow-red-500/30"
+                            : "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/40"
+                        }`}
+                        aria-label={
+                          playingVerseId === item.nomorAyat
+                            ? "Stop audio"
+                            : "Putar audio"
+                        }
+                      >
+                        {playingVerseId === item.nomorAyat ? (
+                          <>
+                            <FiPause className="h-5 w-5 sm:mr-2 animate-pulse" />
+                            <span className="hidden sm:inline">Berhenti</span>
+                          </>
+                        ) : (
+                          <>
+                            <FiVolume2 className="h-5 w-5 sm:mr-2" />
+                            <span className="hidden sm:inline">Putar</span>
+                          </>
+                        )}
+                      </button>
                       <button
                         onClick={() => openTafsir(item.nomorAyat)}
-                        className="px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition duration-200 flex items-center text-emerald-700 dark:text-emerald-400 font-medium"
+                        className="px-3 sm:px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-900/20 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition duration-200 flex items-center text-emerald-700 dark:text-emerald-400 font-medium"
                         aria-label="Lihat tafsir"
                       >
-                        <FiBookOpen className="w-5 h-5 mr-2" />
-                        Tafsir
+                        <FiBookOpen className="w-5 h-5 sm:mr-2" />
+                        <span className="hidden sm:inline">Tafsir</span>
                       </button>
                       <button
                         onClick={() =>
@@ -545,11 +612,11 @@ export default function SurahRead() {
                             item.nomorAyat,
                           )
                         }
-                        className="px-4 py-2 rounded-full bg-gray-50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 transition duration-200 flex items-center text-gray-700 dark:text-gray-200 font-medium"
+                        className="px-3 sm:px-4 py-2 rounded-full bg-gray-50 dark:bg-slate-700/50 hover:bg-gray-100 dark:hover:bg-slate-700 transition duration-200 flex items-center text-gray-700 dark:text-gray-200 font-medium"
                         aria-label="Salin ayat"
                       >
-                        <FiCopy className="h-5 w-5 mr-2" />
-                        Salin
+                        <FiCopy className="h-5 w-5 sm:mr-2" />
+                        <span className="hidden sm:inline">Salin</span>
                       </button>
                     </div>
                   </div>
