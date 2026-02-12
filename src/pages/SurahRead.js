@@ -18,6 +18,7 @@ import {
 import { convertToArabicNumbers, RawHTML } from "../helpers";
 import SEO from "../components/SEO";
 import ThemeToggle from "../components/ThemeToggle";
+import Toast from "../components/Toast";
 
 export default function SurahRead() {
   const { no } = useParams();
@@ -28,6 +29,13 @@ export default function SurahRead() {
   const [playingVerseId, setPlayingVerseId] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
   const [bookmark, setBookmark] = useState([]);
+
+  // State untuk Toast
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = "success") => {
+    setToast({ message, type });
+  };
 
   // State untuk audio
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
@@ -117,7 +125,10 @@ export default function SurahRead() {
       timestamp: new Date().getTime(),
     };
     localStorage.setItem("lastRead", JSON.stringify(lastReadData));
-    alert(`Berhasil menandai Ayat ${nomorAyat} sebagai terakhir dibaca!`);
+    showToast(
+      `Berhasil menandai Ayat ${nomorAyat} sebagai terakhir dibaca!`,
+      "success",
+    );
   };
 
   useEffect(() => {
@@ -210,7 +221,7 @@ export default function SurahRead() {
   const toggleSurahAudio = async () => {
     const surahAudioUrl = surahData.audioFull && surahData.audioFull["01"];
     if (!surahAudioUrl) {
-      alert("Maaf, audio untuk surah ini tidak tersedia.");
+      showToast("Maaf, audio untuk surah ini tidak tersedia.", "error");
       return;
     }
 
@@ -233,7 +244,10 @@ export default function SurahRead() {
       setIsPlayingAudio(!isPlayingAudio);
     } catch (error) {
       console.error("Error playing audio:", error);
-      alert("Gagal memutar audio. Pastikan browser Anda mengizinkan autoplay.");
+      showToast(
+        "Gagal memutar audio. Pastikan browser Anda mengizinkan autoplay.",
+        "error",
+      );
       setIsPlayingAudio(false);
     }
   };
@@ -244,7 +258,7 @@ export default function SurahRead() {
       setSelectedTafsir({ nomor: ayatNumber, teks: tafsirAyat.teks });
       setIsTafsirOpen(true);
     } else {
-      alert("Tafsir untuk ayat ini tidak ditemukan.");
+      showToast("Tafsir untuk ayat ini tidak ditemukan.", "error");
     }
   };
 
@@ -272,10 +286,10 @@ export default function SurahRead() {
     const textToCopy = `${arabicText}\n\n${indonesianText}\n\n(QS. ${surahData.namaLatin}:${verseNumber})`;
     navigator.clipboard
       .writeText(textToCopy)
-      .then(() => alert("Ayat berhasil disalin!"))
+      .then(() => showToast("Ayat berhasil disalin!", "success"))
       .catch((err) => {
         console.error("Gagal menyalin ayat:", err);
-        alert("Gagal menyalin ayat.");
+        showToast("Gagal menyalin ayat.", "error");
       });
   };
 
@@ -423,7 +437,7 @@ export default function SurahRead() {
             <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 mb-8 text-center border border-gray-100 dark:border-slate-700">
               <div className="flex justify-center mb-4">
                 <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500 to-blue-500 dark:from-emerald-600 dark:to-emerald-800 flex items-center justify-center text-white font-bold text-xl shadow-lg">
-                  <h1 className="text-4xl font-arabic">{surahData.nama}</h1>
+                  <h1 className="text-2xl font-arabic">{surahData.nama}</h1>
                 </div>
               </div>
               <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -619,6 +633,15 @@ export default function SurahRead() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
       )}
     </div>
   );
