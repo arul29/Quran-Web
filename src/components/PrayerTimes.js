@@ -113,22 +113,109 @@ export default function PrayerTimes() {
   // Initialize
   useEffect(() => {
     const init = async () => {
+      // 1. Fetch provinces first as they are needed for matching
+      let allProvinces = provinces;
+      if (provinces.length === 0) {
+        try {
+          const res = await axios.get(
+            "https://equran.id/api/v2/imsakiyah/provinsi",
+          );
+          if (res.data.code === 200) {
+            allProvinces = res.data.data;
+            setProvinces(allProvinces);
+          }
+        } catch (err) {
+          console.error("Gagal ambil provinsi", err);
+        }
+      }
+
       const saved = localStorage.getItem("user_location");
-      let currentLoc = {
-        provinsi: "DKI Jakarta",
-        kabkota: "Kota Jakarta Pusat",
-      };
       if (saved) {
         try {
-          currentLoc = JSON.parse(saved);
+          const currentLoc = JSON.parse(saved);
           setLocation(currentLoc);
+          await fetchCities(currentLoc.provinsi);
+          await fetchImsakiyah(currentLoc.provinsi, currentLoc.kabkota);
+          return; // Exit if loaded from saved
         } catch (e) {
           console.error("Invalid saved location", e);
         }
       }
-      await fetchProvinces();
-      await fetchCities(currentLoc.provinsi);
-      await fetchImsakiyah(currentLoc.provinsi, currentLoc.kabkota);
+
+      // 2. If no saved location, try auto-detect
+      if (navigator.geolocation) {
+        setDetecting(true);
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            try {
+              const res = await axios.get(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`,
+              );
+              const addr = res.data.address;
+              const city =
+                addr.city || addr.town || addr.city_district || addr.county;
+              const state = addr.state;
+
+              if (state && city && allProvinces.length > 0) {
+                const matchedProv = allProvinces.find(
+                  (p) =>
+                    state.toLowerCase().includes(p.toLowerCase()) ||
+                    p.toLowerCase().includes(state.toLowerCase()),
+                );
+
+                if (matchedProv) {
+                  const fetchedCities = await fetchCities(matchedProv);
+                  const matchedCity = fetchedCities.find(
+                    (c) =>
+                      city.toLowerCase().includes(c.toLowerCase()) ||
+                      c.toLowerCase().includes(city.toLowerCase()),
+                  );
+
+                  if (matchedCity) {
+                    await fetchImsakiyah(matchedProv, matchedCity);
+                    setDetecting(false);
+                    return;
+                  }
+                }
+              }
+              // Fallback if no match found
+              const fallback = {
+                provinsi: "DKI Jakarta",
+                kabkota: "Kota Jakarta Pusat",
+              };
+              await fetchCities(fallback.provinsi);
+              await fetchImsakiyah(fallback.provinsi, fallback.kabkota);
+            } catch (err) {
+              const fallback = {
+                provinsi: "DKI Jakarta",
+                kabkota: "Kota Jakarta Pusat",
+              };
+              await fetchCities(fallback.provinsi);
+              await fetchImsakiyah(fallback.provinsi, fallback.kabkota);
+            } finally {
+              setDetecting(false);
+            }
+          },
+          async () => {
+            // Geolocation denied or failed
+            setDetecting(false);
+            const fallback = {
+              provinsi: "DKI Jakarta",
+              kabkota: "Kota Jakarta Pusat",
+            };
+            await fetchCities(fallback.provinsi);
+            await fetchImsakiyah(fallback.provinsi, fallback.kabkota);
+          },
+        );
+      } else {
+        // Geolocation not supported
+        const fallback = {
+          provinsi: "DKI Jakarta",
+          kabkota: "Kota Jakarta Pusat",
+        };
+        await fetchCities(fallback.provinsi);
+        await fetchImsakiyah(fallback.provinsi, fallback.kabkota);
+      }
     };
     init();
   }, [fetchImsakiyah]);
