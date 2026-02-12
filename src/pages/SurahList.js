@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { convertToArabicNumbers } from "../helpers";
 import { FaBoxOpen } from "react-icons/fa";
+import { Helmet } from "react-helmet-async";
 
 export default function SurahList() {
   const [loading, setLoading] = useState(false);
@@ -67,8 +68,8 @@ export default function SurahList() {
           tempatTurun: item.tempatTurun, // Simpan tempatTurun
           arti: item.arti,
           // Jika Anda perlu menyimpan audioFull atau deskripsi, tambahkan di sini
-        })
-      )
+        }),
+      ),
     );
     getBookmark();
   };
@@ -92,6 +93,18 @@ export default function SurahList() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+      <Helmet>
+        <title>Al-Qur'an Indonesia - Baca Online 30 Juz</title>
+        <meta
+          name="description"
+          content="Baca Al-Qur'an secara online di Al-Qur'an Indonesia. Tersedia 114 Surah lengkap dengen terjemahan Bahasa Indonesia dan audio."
+        />
+        <meta
+          property="og:title"
+          content="Al-Qur'an Indonesia - Baca Online 30 Juz"
+        />
+        <meta property="og:url" content={window.location.href} />
+      </Helmet>
       {/* Header Section */}
       <div className="relative overflow-hidden bg-gradient-to-r from-emerald-600 to-blue-600">
         <div className="absolute inset-0 bg-black/10"></div>

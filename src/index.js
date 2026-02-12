@@ -5,12 +5,16 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
 import ReactDOM from "react-dom/client";
+import { HelmetProvider } from "react-helmet-async";
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(
-  <BrowserRouter>
-    <App />
-  </BrowserRouter>
+  <HelmetProvider>
+    <BrowserRouter>
+      <App />
+    </BrowserRouter>
+  </HelmetProvider>,
 );
 
 // If you want your app to work offline and load faster, you can change

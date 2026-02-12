@@ -16,6 +16,7 @@ import { BsBookmarkFill } from "react-icons/bs"; // Filled bookmark icon
 
 import { convertToArabicNumbers, RawHTML } from "../helpers";
 import { FaBoxOpen } from "react-icons/fa";
+import { Helmet } from "react-helmet-async";
 
 export default function SurahRead() {
   const { no } = useParams();
@@ -197,7 +198,7 @@ export default function SurahRead() {
     } catch (error) {
       console.error("Error playing audio:", error);
       alert(
-        "Gagal memutar audio. Pastikan browser Anda mengizinkan autoplay atau coba lagi."
+        "Gagal memutar audio. Pastikan browser Anda mengizinkan autoplay atau coba lagi.",
       );
       setIsPlayingAudio(false);
     }
@@ -205,6 +206,30 @@ export default function SurahRead() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50">
+      <Helmet>
+        <title>
+          {surahData.namaLatin
+            ? `${surahData.namaLatin} (${surahData.arti}) - Al-Qur'an Indonesia`
+            : "Memuat Surah... - Al-Qur'an Indonesia"}
+        </title>
+        <meta
+          name="description"
+          content={
+            surahData.namaLatin
+              ? `Baca Surah ${surahData.namaLatin} (${surahData.arti}) lengkap dengan terjemahan Bahasa Indonesia, teks Arab, dan audio resmi di Al-Qur'an Indonesia.`
+              : "Baca Al-Qur'an Online dengan terjemahan Bahasa Indonesia."
+          }
+        />
+        <meta
+          property="og:title"
+          content={`${surahData.namaLatin} - Al-Qur'an Indonesia`}
+        />
+        <meta
+          property="og:description"
+          content={`Baca Surah ${surahData.namaLatin} (${surahData.arti}) lengkap dengan terjemahan Bahasa Indonesia dan audio.`}
+        />
+        <meta property="og:url" content={window.location.href} />
+      </Helmet>
       {/* Header Section (adapted from SurahList for consistency) */}
       <div
         ref={headerRef}
