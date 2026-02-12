@@ -164,13 +164,13 @@ export default function SurahList() {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-wrap justify-center items-center gap-4 mt-8">
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mt-8 max-w-2xl mx-auto">
             <button
               onClick={() => {
                 setViewBookmark(!viewBookmark);
                 viewBookmark ? setSurahList(surahAll) : setSurahList(bookmark);
               }}
-              className="inline-flex items-center px-6 py-3 rounded-full bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition-all duration-200 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium group"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-full bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition-all duration-200 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium group"
             >
               {viewBookmark ? (
                 <Library
@@ -188,7 +188,7 @@ export default function SurahList() {
 
             <Link
               to="/bantuan"
-              className="inline-flex items-center px-6 py-3 rounded-full bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition-all duration-200 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium group"
+              className="w-full sm:w-auto inline-flex items-center justify-center px-6 py-3 rounded-full bg-white dark:bg-slate-800 shadow-md hover:shadow-lg transition-all duration-200 text-gray-700 dark:text-gray-200 hover:text-emerald-600 dark:hover:text-emerald-400 font-medium group"
             >
               <HelpCircle
                 className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform"
