@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="flex flex-col items-center">
           <div className="text-center">
-            <div className="flex items-center gap-6 mb-4">
+            <div className="flex items-center justify-center gap-6 mb-4">
               <a
                 href="/bantuan"
                 className="text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors"
