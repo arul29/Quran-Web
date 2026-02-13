@@ -1,5 +1,5 @@
 import "./App.css";
-import RoutesContainer from "./routes";
+import RoutesContainer from "@/routes";
 
 function App() {
   return <RoutesContainer />;

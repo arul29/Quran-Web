@@ -12,8 +12,8 @@ import {
   Lightbulb,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import SEO from "../components/SEO";
-import ThemeToggle from "../components/ThemeToggle";
+import SEO from "@/components/SEO";
+import ThemeToggle from "@/components/ThemeToggle";
 
 const HelpCard = ({ icon: Icon, title, description, steps }) => (
   <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-xl shadow-gray-200/50 dark:shadow-none border border-gray-100 dark:border-slate-700 hover:border-emerald-500 dark:hover:border-emerald-500 transition-all duration-300 group">

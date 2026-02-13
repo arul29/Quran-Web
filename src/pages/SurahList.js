@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { convertToArabicNumbers } from "../helpers";
+import { convertToArabicNumbers } from "@/helpers";
 import {
   Box,
   Search,
@@ -13,11 +13,11 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Link } from "react-router-dom";
-import SEO from "../components/SEO";
-import ThemeToggle from "../components/ThemeToggle";
-import RamadhanBanner from "../components/RamadhanBanner";
-import PrayerTimes from "../components/PrayerTimes";
-import ShalatTimes from "../components/ShalatTimes";
+import SEO from "@/components/SEO";
+import ThemeToggle from "@/components/ThemeToggle";
+import RamadhanBanner from "@/components/RamadhanBanner";
+import PrayerTimes from "@/components/PrayerTimes";
+import ShalatTimes from "@/components/ShalatTimes";
 
 export default function SurahList() {
   const [loading, setLoading] = useState(false);

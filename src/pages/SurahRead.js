@@ -22,10 +22,10 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 
-import { convertToArabicNumbers, RawHTML } from "../helpers";
-import SEO from "../components/SEO";
-import ThemeToggle from "../components/ThemeToggle";
-import Toast from "../components/Toast";
+import { convertToArabicNumbers, RawHTML } from "@/helpers";
+import SEO from "@/components/SEO";
+import ThemeToggle from "@/components/ThemeToggle";
+import Toast from "@/components/Toast";
 
 export default function SurahRead() {
   const { no } = useParams();

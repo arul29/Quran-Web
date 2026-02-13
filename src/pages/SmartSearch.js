@@ -10,9 +10,9 @@ import {
   BookOpen,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import SEO from "../components/SEO";
-import ThemeToggle from "../components/ThemeToggle";
-import Toast from "../components/Toast";
+import SEO from "@/components/SEO";
+import ThemeToggle from "@/components/ThemeToggle";
+import Toast from "@/components/Toast";
 
 export default function SmartSearch() {
   const navigate = useNavigate();
