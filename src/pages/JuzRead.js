@@ -9,7 +9,6 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
-  Bookmark,
   History,
   Share2,
   Volume2,
@@ -21,7 +20,6 @@ import {
   Facebook,
   Link2,
   MoreHorizontal,
-  ExternalLink,
 } from "lucide-react";
 import SEO from "@/components/SEO";
 import Toast from "@/components/Toast";

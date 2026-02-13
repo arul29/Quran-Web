@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Sparkles, Quran, Quote } from "lucide-react";
+import { Sparkles, Quote } from "lucide-react";
 
 const RAMADHAN_AYATS = [
   {
