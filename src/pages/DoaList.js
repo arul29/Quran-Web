@@ -9,6 +9,8 @@ import {
   HandHeart,
   ArrowRight,
   Heart,
+  Filter,
+  X,
 } from "lucide-react";
 import SEO from "@/components/SEO";
 import Toast from "@/components/Toast";
@@ -19,6 +21,9 @@ export default function DoaList() {
   const [doaList, setDoaList] = useState([]);
   const [filteredDoa, setFilteredDoa] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedGrup, setSelectedGrup] = useState("");
+  const [grupList, setGrupList] = useState([]);
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [bookmarks, setBookmarks] = useState([]);
   const [toast, setToast] = useState(null);
 
@@ -55,7 +60,7 @@ export default function DoaList() {
 
   useEffect(() => {
     filterDoa();
-  }, [searchQuery, doaList]);
+  }, [searchQuery, selectedGrup, doaList]);
 
   const fetchDoaList = async () => {
     try {
@@ -64,6 +69,10 @@ export default function DoaList() {
 
       if (response.data.status === "success") {
         setDoaList(response.data.data);
+
+        // Extract unique groups
+        const groups = [...new Set(response.data.data.map((doa) => doa.grup))];
+        setGrupList(groups.sort());
       }
     } catch (error) {
       console.error("Error fetching doa:", error);
@@ -75,6 +84,11 @@ export default function DoaList() {
 
   const filterDoa = () => {
     let filtered = doaList;
+
+    // Filter by category
+    if (selectedGrup) {
+      filtered = filtered.filter((doa) => doa.grup === selectedGrup);
+    }
 
     // Filter by search query
     if (searchQuery) {
@@ -171,22 +185,53 @@ export default function DoaList() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
-        <div className="mb-12">
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
-              <Search
-                className="h-5 w-5 text-gray-400 group-focus-within:text-emerald-500 transition-colors"
-                strokeWidth={2.5}
+        <div className="mb-12 space-y-4">
+          <div className="flex gap-3">
+            <div className="relative group flex-1">
+              <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
+                <Search
+                  className="h-5 w-5 text-gray-400 group-focus-within:text-emerald-500 transition-colors"
+                  strokeWidth={2.5}
+                />
+              </div>
+              <input
+                onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchQuery}
+                type="search"
+                className="w-full pl-14 pr-6 py-5 text-lg border border-gray-100 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900 shadow-2xl shadow-emerald-500/5 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:outline-none transition-all duration-300 dark:text-white dark:placeholder-gray-500"
+                placeholder="Cari doa berdasarkan nama, kategori, atau tag..."
               />
             </div>
-            <input
-              onChange={(e) => setSearchQuery(e.target.value)}
-              value={searchQuery}
-              type="search"
-              className="w-full pl-14 pr-6 py-5 text-lg border border-gray-100 dark:border-slate-800 rounded-3xl bg-white dark:bg-slate-900 shadow-2xl shadow-emerald-500/5 focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 focus:outline-none transition-all duration-300 dark:text-white dark:placeholder-gray-500"
-              placeholder="Cari doa berdasarkan nama, kategori, atau tag..."
-            />
+            <button
+              onClick={() => setShowFilterModal(true)}
+              className={`px-6 py-5 rounded-3xl border transition-all duration-300 flex items-center gap-2 font-bold ${
+                selectedGrup
+                  ? "bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-500/20"
+                  : "bg-white dark:bg-slate-900 text-gray-700 dark:text-gray-200 border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 shadow-2xl shadow-emerald-500/5"
+              }`}
+            >
+              <Filter size={20} strokeWidth={2.5} />
+              <span className="hidden sm:inline">Filter</span>
+            </button>
           </div>
+
+          {/* Active Filter Badge */}
+          {selectedGrup && (
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Kategori:
+              </span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-xl font-medium">
+                {selectedGrup}
+                <button
+                  onClick={() => setSelectedGrup("")}
+                  className="p-1 hover:bg-emerald-200 dark:hover:bg-emerald-800/50 rounded-lg transition-colors"
+                >
+                  <X size={14} strokeWidth={2.5} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {loading ? (
@@ -223,9 +268,9 @@ export default function DoaList() {
                       window.pageYOffset.toString(),
                     );
                   }}
-                  className="group bg-white dark:bg-slate-800 rounded-2xl shadow-sm hover:shadow-xl dark:hover:shadow-emerald-900/10 transition-all duration-300 overflow-hidden border border-gray-100 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-800"
+                  className="group flex flex-col h-full bg-white dark:bg-slate-800 rounded-2xl shadow-sm hover:shadow-xl dark:hover:shadow-emerald-900/10 transition-all duration-300 overflow-hidden border border-gray-100 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-800"
                 >
-                  <div className="p-6">
+                  <div className="p-6 flex-1 flex flex-col">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-shrink-0 w-16 h-16 bg-gradient-to-br from-emerald-500 to-blue-500 dark:from-emerald-600 dark:to-emerald-800 rounded-full flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:scale-105 transition-transform duration-200">
                         <HandHeart size={28} strokeWidth={2} />
@@ -263,7 +308,7 @@ export default function DoaList() {
                       </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3 flex-1">
                       <div>
                         <span className="inline-block px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 rounded-lg text-xs font-medium mb-2">
                           {doa.grup}
@@ -274,12 +319,8 @@ export default function DoaList() {
                         {doa.nama}
                       </h3>
 
-                      <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                        {doa.idn}
-                      </p>
-
                       {doa.tag && doa.tag.length > 0 && (
-                        <div className="flex items-center gap-2 flex-wrap">
+                        <div className="flex items-center gap-2 flex-wrap pt-2">
                           {doa.tag.slice(0, 3).map((tag, index) => (
                             <span
                               key={index}
@@ -298,9 +339,9 @@ export default function DoaList() {
                     </div>
                   </div>
 
-                  <div className="px-6 py-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-700">
+                  <div className="px-6 py-3 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-700 mt-auto">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="text-gray-500 dark:text-gray-400">
+                      <span className="text-gray-500 dark:text-gray-400 font-medium">
                         {bookmarks.includes(doa.id)
                           ? "★ Favorit"
                           : "Lihat Detail"}
@@ -316,6 +357,65 @@ export default function DoaList() {
           </div>
         )}
       </div>
+
+      {/* Filter Modal */}
+      {showFilterModal && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-4"
+          onClick={() => setShowFilterModal(false)}
+        >
+          <div
+            className="bg-white dark:bg-slate-800 rounded-t-3xl sm:rounded-3xl w-full max-w-md max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="sticky top-0 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-slate-700 p-6 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Filter Kategori
+              </h2>
+              <button
+                onClick={() => setShowFilterModal(false)}
+                className="p-2 rounded-xl bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors"
+              >
+                <X size={20} className="text-gray-600 dark:text-gray-400" />
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-2">
+              <button
+                onClick={() => {
+                  setSelectedGrup("");
+                  setShowFilterModal(false);
+                }}
+                className={`w-full text-left px-4 py-3 rounded-xl transition-colors font-medium ${
+                  selectedGrup === ""
+                    ? "bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
+                    : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600"
+                }`}
+              >
+                Semua Kategori
+              </button>
+              {grupList.map((grup) => (
+                <button
+                  key={grup}
+                  onClick={() => {
+                    setSelectedGrup(grup);
+                    setShowFilterModal(false);
+                  }}
+                  className={`w-full text-left px-4 py-3 rounded-xl transition-colors font-medium ${
+                    selectedGrup === grup
+                      ? "bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
+                      : "bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-slate-600"
+                  }`}
+                >
+                  {grup}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Toast Notification */}
       {toast && <Toast message={toast.message} type={toast.type} />}
