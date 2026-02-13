@@ -1,31 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Sparkles, Quote } from "lucide-react";
-
-const RAMADHAN_AYATS = [
-  {
-    surah: "Al-Baqarah",
-    ayat: 183,
-    text: "Wahai orang-orang yang beriman! Diwajibkan atas kamu berpuasa sebagaimana diwajibkan atas orang sebelum kamu agar kamu bertakwa.",
-    arabic:
-      "يَا أَيُّهَا الَّذِينَ آمَنُوا كُتِبَ عَلَيْكُمُ الصِّيَامُ كَمَا كُتِبَ عَلَى الَّذِينَ مِن قَبْلِكُمْ لَعَلَّكُمْ تَتَّقُونَ",
-  },
-  {
-    surah: "Al-Baqarah",
-    ayat: 185,
-    text: "Bulan Ramadhan adalah (bulan) yang di dalamnya diturunkan Al-Qur'an, sebagai petunjuk bagi manusia dan penjelasan-penjelasan mengenai petunjuk itu dan pembeda (antara yang benar dan yang salah).",
-    arabic:
-      "شَهْرُ رَمَضَانَ الَّذِي أُنزِلَ فِيهِ الْقُرْآنُ هُدًى لِّلنَّاسِ وَبَيِّنَاتٍ مِّنَ الْهُدَىٰ وَالْفُرْقَانِ",
-  },
-  {
-    surah: "Al-Qadr",
-    ayat: 1,
-    text: "Sesungguhnya Kami telah menurunkannya (Al-Qur'an) pada malam qadar.",
-    arabic: "إِنَّا أَنزَلْنَاهُ فِي لَيْلَةِ الْقَدْرِ",
-  },
-];
+import {
+  Sparkles,
+  Quote,
+  Loader2,
+  BookOpen,
+  RotateCcw,
+  Book,
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
 export default function RamadhanBanner() {
-  const [randomAyat, setRandomAyat] = useState(RAMADHAN_AYATS[0]);
+  const [randomAyat, setRandomAyat] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -35,8 +22,7 @@ export default function RamadhanBanner() {
   const [isRamadhan, setIsRamadhan] = useState(false);
 
   useEffect(() => {
-    const index = Math.floor(Math.random() * RAMADHAN_AYATS.length);
-    setRandomAyat(RAMADHAN_AYATS[index]);
+    fetchDailyVerse();
 
     const calculateTimeLeft = () => {
       const ramadhanDate = new Date("February 18, 2026 00:00:00").getTime();
@@ -61,6 +47,42 @@ export default function RamadhanBanner() {
 
     return () => clearInterval(timer);
   }, []);
+
+  const fetchDailyVerse = async (forceRefresh = false) => {
+    setLoading(true);
+    const today = new Date().toDateString();
+    const storedData = localStorage.getItem("verseOfTheDay");
+
+    if (storedData && !forceRefresh) {
+      const parsedData = JSON.parse(storedData);
+      if (parsedData.date === today) {
+        setRandomAyat(parsedData.verse);
+        setLoading(false);
+        return;
+      }
+    }
+
+    try {
+      const res = await axios.get("https://api.myquran.com/v3/quran/random");
+      if (res.data.status) {
+        const verseData = res.data.data;
+        setRandomAyat(verseData);
+        if (!forceRefresh) {
+          localStorage.setItem(
+            "verseOfTheDay",
+            JSON.stringify({
+              date: today,
+              verse: verseData,
+            }),
+          );
+        }
+      }
+    } catch (err) {
+      console.error("Gagal mengambil ayat:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="relative overflow-hidden mb-8 group rounded-[2.5rem]">
@@ -118,45 +140,68 @@ export default function RamadhanBanner() {
 
         {/* Right Side: Verse of the Day Card */}
         <div className="w-full md:w-[450px]">
-          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 shadow-xl relative overflow-hidden group/card shadow-emerald-900/20">
-            <div className="absolute top-0 right-0 p-4 opacity-10">
-              <Quote size={80} className="text-white" />
-            </div>
-
-            <div className="flex items-center gap-3 mb-4">
-              <div className="p-2 bg-emerald-500 rounded-xl shadow-lg shadow-emerald-500/30">
-                <Sparkles size={18} className="text-white" />
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 shadow-xl relative overflow-hidden group/card shadow-emerald-900/20 min-h-[220px] flex flex-col justify-center">
+            {loading ? (
+              <div className="flex flex-col items-center justify-center space-y-3 animate-pulse">
+                <Loader2 className="w-8 h-8 text-white/50 animate-spin" />
+                <p className="text-white/50 text-xs font-bold uppercase tracking-widest">
+                  Memuat Ayat...
+                </p>
               </div>
-              <span className="text-white font-bold tracking-wide uppercase text-xs">
-                Ayat Hari Ini
-              </span>
-            </div>
+            ) : randomAyat ? (
+              <>
+                <div className="absolute top-0 right-10 p-4 opacity-10 pointer-events-none">
+                  <Quote size={80} className="text-white" />
+                </div>
 
-            <p
-              className="text-right text-2xl font-arabic text-white mb-4 leading-loose"
-              dir="rtl"
-            >
-              {randomAyat.arabic}
-            </p>
-            <p className="text-emerald-50/90 text-sm italic mb-4 line-clamp-3">
-              "{randomAyat.text}"
-            </p>
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-emerald-300 px-3 py-1 bg-emerald-900/50 rounded-full border border-emerald-500/30">
-                QS. {randomAyat.surah}: {randomAyat.ayat}
-              </span>
-              <button
-                className="text-xs font-bold text-white flex items-center gap-1 hover:gap-2 transition-all group-hover/card:translate-x-1"
-                onClick={() => {
-                  const index = Math.floor(
-                    Math.random() * RAMADHAN_AYATS.length,
-                  );
-                  setRandomAyat(RAMADHAN_AYATS[index]);
-                }}
-              >
-                Ganti Ayat
-              </button>
-            </div>
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-emerald-500 rounded-xl shadow-lg shadow-emerald-500/30">
+                      <Book size={18} className="text-white" />
+                    </div>
+                    <span className="text-white font-bold tracking-wide uppercase text-xs">
+                      Ayat Hari Ini
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => fetchDailyVerse(true)}
+                    className="p-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-white/70 hover:text-white transition-all active:scale-95 group/btn"
+                    title="Ganti Ayat"
+                  >
+                    <RotateCcw
+                      size={14}
+                      className="group-hover/btn:rotate-[-180deg] transition-transform duration-500"
+                    />
+                  </button>
+                </div>
+
+                <p
+                  className="text-right text-2xl font-arabic text-white mb-4 leading-loose"
+                  dir="rtl"
+                >
+                  {randomAyat.arab}
+                </p>
+                <p className="text-emerald-50/90 text-sm italic mb-4 line-clamp-3">
+                  "{randomAyat.translation}"
+                </p>
+                <div className="flex items-center justify-between mt-auto">
+                  <span className="text-[10px] font-bold text-emerald-300 px-3 py-1 bg-emerald-900/50 rounded-full border border-emerald-500/30">
+                    QS. {randomAyat.surah.name_latin}: {randomAyat.ayah_number}
+                  </span>
+                  <Link
+                    to={`/baca/${randomAyat.surah_number}#verse-${randomAyat.ayah_number}`}
+                    className="text-xs font-bold text-white flex items-center gap-1.5 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-xl transition-all border border-white/10"
+                  >
+                    <BookOpen size={14} />
+                    Baca Ayat
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <p className="text-white/50 text-center text-sm">
+                Gagal memuat ayat.
+              </p>
+            )}
           </div>
         </div>
       </div>
