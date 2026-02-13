@@ -14,3 +14,19 @@ export const RawHTML = ({ children, className = "" }) => (
     }}
   />
 );
+
+// Export Juz-related functions (Bahasa Indonesia untuk konsistensi dengan API)
+export {
+  juzData,
+  dapatkanJuzBerdasarkanNomor,
+  dapatkanJuzBerdasarkanSurahDanAyat,
+  dapatkanSemuaJuz,
+  dapatkanRingkasanJuz,
+  dapatkanRangeAyatDalamJuz,
+  // English aliases untuk backward compatibility
+  getJuzByNumber,
+  getJuzBySurahAndVerse,
+  getAllJuz,
+  getJuzSummary,
+  getVerseRangeInJuz,
+} from "./juzData";

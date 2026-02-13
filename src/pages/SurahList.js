@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { convertToArabicNumbers } from "@/helpers";
 import {
-  Box,
+  BookOpen,
   Search,
   Bookmark,
   Library,
+  Box,
   History,
   Trash2,
   HelpCircle,
@@ -163,7 +164,7 @@ export default function SurahList() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white tracking-tight animate-slide-up leading-[1.1]">
-            Baca <span className="text-emerald-400">Al-Qur`an</span> di mana
+            Baca <span className="text-emerald-400">Al-Qur'an</span> di mana
             saja.
           </h1>
 
@@ -214,31 +215,43 @@ export default function SurahList() {
             </div>
           </div>
 
-          {/* Action Buttons - Refined Side-by-Side on Mobile */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full animate-fade-in delay-100">
+          {/* Action Buttons - 3 Columns Grid */}
+          <div className="grid grid-cols-3 gap-3 sm:gap-4 w-full animate-fade-in delay-100">
             <button
               onClick={() => {
                 setViewBookmark(!viewBookmark);
                 viewBookmark ? setSurahList(surahAll) : setSurahList(bookmark);
               }}
-              className="flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-8 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
+              className="flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
             >
               {viewBookmark ? (
                 <Library className="w-5 h-5 group-hover:scale-110 transition-transform text-emerald-500" />
               ) : (
                 <Bookmark className="w-5 h-5 group-hover:scale-110 transition-transform text-emerald-500" />
               )}
-              <span className="text-xs sm:text-base">
+              <span className="text-xs sm:text-base hidden sm:inline">
                 {viewBookmark ? "Semua Surah" : "Bookmark"}
               </span>
             </button>
 
             <Link
+              to="/juz"
+              className="flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
+            >
+              <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform text-emerald-500" />
+              <span className="text-xs sm:text-base hidden sm:inline">
+                Baca per Juz
+              </span>
+            </Link>
+
+            <Link
               to="/bantuan"
-              className="flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-8 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
+              className="flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
             >
               <HelpCircle className="w-5 h-5 group-hover:rotate-12 transition-transform text-emerald-500" />
-              <span className="text-xs sm:text-base">Bantuan</span>
+              <span className="text-xs sm:text-base hidden sm:inline">
+                Bantuan
+              </span>
             </Link>
           </div>
         </div>
