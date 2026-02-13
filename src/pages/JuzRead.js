@@ -9,6 +9,8 @@ import {
 import {
   ChevronLeft,
   ChevronRight,
+  Bookmark,
+  History,
   Share2,
   Volume2,
   Loader,
@@ -128,6 +130,69 @@ export default function JuzRead() {
     });
     setShareModalOpen(true);
   };
+
+  const saveLastRead = (verse) => {
+    const lastReadData = {
+      nomorSurah: verse.surahNumber,
+      namaLatin: verse.surahName,
+      nomorAyat: verse.nomorAyat,
+      juz: parseInt(juzNumber),
+      type: "juz",
+      timestamp: new Date().getTime(),
+    };
+    localStorage.setItem("lastRead", JSON.stringify(lastReadData));
+    showToast(
+      `Berhasil menandai Ayat ${verse.nomorAyat} sebagai terakhir dibaca di Juz ${juzNumber}!`,
+      "success",
+    );
+  };
+
+  // Separate useEffect for scrolling to verse AFTER data is fully loaded
+  useEffect(() => {
+    if (!loading && verses.length > 0) {
+      const scrollTarget = window.location.hash;
+
+      // If no hash, check if this Juz is the last read one
+      let autoScrollId = null;
+      if (scrollTarget) {
+        autoScrollId = scrollTarget.replace("#", "");
+      } else {
+        const lastRead = JSON.parse(localStorage.getItem("lastRead"));
+        if (lastRead && lastRead.juz === parseInt(juzNumber)) {
+          autoScrollId = `verse-${lastRead.nomorSurah}-${lastRead.nomorAyat}`;
+        }
+      }
+
+      if (autoScrollId) {
+        const timer = setTimeout(() => {
+          const element = document.getElementById(autoScrollId);
+          if (element) {
+            const yOffset = -100;
+            const y =
+              element.getBoundingClientRect().top +
+              window.pageYOffset +
+              yOffset;
+            window.scrollTo({ top: y, behavior: "smooth" });
+
+            // Highlight effect
+            element.classList.add(
+              "ring-4",
+              "ring-emerald-500/50",
+              "animate-pulse",
+            );
+            setTimeout(() => {
+              element.classList.remove(
+                "ring-4",
+                "ring-emerald-500/50",
+                "animate-pulse",
+              );
+            }, 3000);
+          }
+        }, 500);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [loading, verses, juzNumber]);
 
   const shareToSocial = (platform) => {
     if (!shareData) return;
@@ -363,6 +428,14 @@ export default function JuzRead() {
                           size={18}
                           className={isPlaying ? "animate-pulse" : ""}
                         />
+                      </button>
+
+                      <button
+                        onClick={() => saveLastRead(verse)}
+                        className="p-2 rounded-xl bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400 hover:bg-emerald-100 dark:hover:bg-emerald-900/30 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                        title="Tandai Terakhir Dibaca"
+                      >
+                        <History size={18} />
                       </button>
 
                       <button

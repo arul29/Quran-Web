@@ -276,10 +276,14 @@ export default function SurahList() {
                       </span>
                     </div>
                     <h3 className="text-xl font-bold text-white leading-tight">
-                      {lastRead.namaLatin}
+                      {lastRead.type === "juz"
+                        ? `Juz ${lastRead.juz}`
+                        : lastRead.namaLatin}
                     </h3>
                     <p className="text-white/70 text-sm">
-                      Ayat {lastRead.nomorAyat}{" "}
+                      {lastRead.type === "juz"
+                        ? `${lastRead.namaLatin} Ayat ${lastRead.nomorAyat}`
+                        : `Ayat ${lastRead.nomorAyat}`}{" "}
                       <span className="mx-1 • text-white/30">•</span> Lanjutkan
                       Membaca
                     </p>
@@ -287,13 +291,17 @@ export default function SurahList() {
                 </div>
 
                 <div className="flex items-center gap-3 w-full md:w-auto">
-                  <a
-                    href={`/baca/${lastRead.nomorSurah}#verse-${lastRead.nomorAyat}`}
+                  <Link
+                    to={
+                      lastRead.type === "juz"
+                        ? `/juz/${lastRead.juz}#verse-${lastRead.nomorSurah}-${lastRead.nomorAyat}`
+                        : `/baca/${lastRead.nomorSurah}#verse-${lastRead.nomorAyat}`
+                    }
                     className="flex-1 md:flex-none inline-flex items-center justify-center px-6 py-2.5 bg-white text-emerald-800 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-all duration-200 shadow-md active:scale-95"
                   >
                     <History className="w-4 h-4 mr-2" strokeWidth={2.5} />
                     Lanjutkan Membaca
-                  </a>
+                  </Link>
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
                     className="flex-none p-2.5 bg-white/10 hover:bg-red-500/20 border border-white/20 rounded-xl transition-all duration-200 active:scale-95 text-white"
