@@ -164,8 +164,8 @@ export default function SurahList() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white tracking-tight animate-slide-up leading-[1.1]">
-            Baca <span className="text-emerald-400">Al-Qur'an</span> Dimana
-            Saja.
+            Baca <span className="text-emerald-400">Al-Qur`an</span> di mana
+            saja.
           </h1>
 
           <p className="text-lg text-emerald-100/60 max-w-xl mx-auto leading-relaxed animate-fade-in delay-100 px-4">
