@@ -7,7 +7,6 @@ import {
   Bookmark,
   Library,
   History,
-  X,
   Trash2,
   HelpCircle,
   Sparkles,
