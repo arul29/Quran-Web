@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   convertToArabicNumbers,
@@ -28,6 +28,7 @@ import Toast from "@/components/Toast";
 
 export default function JuzRead() {
   const { juzNumber } = useParams();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [verses, setVerses] = useState([]);
   const [juzInfo, setJuzInfo] = useState(null);
@@ -38,6 +39,7 @@ export default function JuzRead() {
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
+    window.scrollTo(0, 0); // Reset scroll position to top
     loadJuzData();
     return () => {
       if (audioElement) {
@@ -270,12 +272,12 @@ export default function JuzRead() {
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
             Juz tidak ditemukan
           </h2>
-          <Link
-            to="/juz"
+          <button
+            onClick={() => navigate(-1)}
             className="inline-block px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold transition-colors"
           >
             Kembali ke Daftar Juz
-          </Link>
+          </button>
         </div>
       </div>
     );
@@ -292,13 +294,13 @@ export default function JuzRead() {
       <div className="sticky top-0 z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-gray-200 dark:border-slate-800">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link
-              to="/juz"
+            <button
+              onClick={() => navigate(-1)}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 transition-colors text-gray-700 dark:text-gray-200 font-semibold"
             >
               <ChevronLeft size={20} />
               <span className="hidden sm:inline">Daftar Juz</span>
-            </Link>
+            </button>
 
             <div className="text-center">
               <h1 className="text-xl font-bold text-gray-900 dark:text-white">
