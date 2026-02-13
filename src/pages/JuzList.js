@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { convertToArabicNumbers, dapatkanRingkasanJuz } from "@/helpers";
 import { Search, BookOpen, HelpCircle, ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -8,6 +8,10 @@ import ThemeToggle from "@/components/ThemeToggle";
 export default function JuzList() {
   const allJuz = dapatkanRingkasanJuz();
   const [juzList, setJuzList] = useState(allJuz);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const searchJuz = (event) => {
     const searchTerm = event.target.value.toLowerCase();
