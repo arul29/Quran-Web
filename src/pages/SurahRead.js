@@ -132,6 +132,7 @@ export default function SurahRead() {
       nomorSurah: no,
       namaLatin: surahData.namaLatin,
       nomorAyat: nomorAyat,
+      type: "surah",
       timestamp: new Date().getTime(),
     };
     localStorage.setItem("lastRead", JSON.stringify(lastReadData));

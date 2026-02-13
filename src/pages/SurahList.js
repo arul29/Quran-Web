@@ -2,14 +2,16 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { convertToArabicNumbers } from "@/helpers";
 import {
-  Box,
+  BookOpen,
   Search,
   Bookmark,
   Library,
+  Box,
   History,
   Trash2,
   HelpCircle,
   Sparkles,
+  HandHeart,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
@@ -163,7 +165,7 @@ export default function SurahList() {
           </div>
 
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-black text-white tracking-tight animate-slide-up leading-[1.1]">
-            Baca <span className="text-emerald-400">Al-Qur`an</span> di mana
+            Baca <span className="text-emerald-400">Al-Qur'an</span> di mana
             saja.
           </h1>
 
@@ -214,31 +216,53 @@ export default function SurahList() {
             </div>
           </div>
 
-          {/* Action Buttons - Refined Side-by-Side on Mobile */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full animate-fade-in delay-100">
+          {/* Action Buttons - 4 Columns Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full animate-fade-in delay-100">
             <button
               onClick={() => {
                 setViewBookmark(!viewBookmark);
                 viewBookmark ? setSurahList(surahAll) : setSurahList(bookmark);
               }}
-              className="flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-8 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
+              className="flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
             >
               {viewBookmark ? (
                 <Library className="w-5 h-5 group-hover:scale-110 transition-transform text-emerald-500" />
               ) : (
                 <Bookmark className="w-5 h-5 group-hover:scale-110 transition-transform text-emerald-500" />
               )}
-              <span className="text-xs sm:text-base">
+              <span className="text-xs sm:text-base hidden sm:inline">
                 {viewBookmark ? "Semua Surah" : "Bookmark"}
               </span>
             </button>
 
             <Link
+              to="/juz"
+              className="flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
+            >
+              <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform text-emerald-500" />
+              <span className="text-xs sm:text-base hidden sm:inline">
+                Baca per Juz
+              </span>
+            </Link>
+
+            <Link
+              to="/doa"
+              className="flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
+            >
+              <HandHeart className="w-5 h-5 group-hover:scale-110 transition-transform text-emerald-500" />
+              <span className="text-xs sm:text-base hidden sm:inline">
+                Doa Harian
+              </span>
+            </Link>
+
+            <Link
               to="/bantuan"
-              className="flex items-center justify-center gap-2 sm:gap-3 px-4 sm:px-8 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
+              className="flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
             >
               <HelpCircle className="w-5 h-5 group-hover:rotate-12 transition-transform text-emerald-500" />
-              <span className="text-xs sm:text-base">Bantuan</span>
+              <span className="text-xs sm:text-base hidden sm:inline">
+                Bantuan
+              </span>
             </Link>
           </div>
         </div>
@@ -263,10 +287,14 @@ export default function SurahList() {
                       </span>
                     </div>
                     <h3 className="text-xl font-bold text-white leading-tight">
-                      {lastRead.namaLatin}
+                      {lastRead.type === "juz"
+                        ? `Juz ${lastRead.juz}`
+                        : lastRead.namaLatin}
                     </h3>
                     <p className="text-white/70 text-sm">
-                      Ayat {lastRead.nomorAyat}{" "}
+                      {lastRead.type === "juz"
+                        ? `${lastRead.namaLatin} Ayat ${lastRead.nomorAyat}`
+                        : `Ayat ${lastRead.nomorAyat}`}{" "}
                       <span className="mx-1 • text-white/30">•</span> Lanjutkan
                       Membaca
                     </p>
@@ -274,13 +302,17 @@ export default function SurahList() {
                 </div>
 
                 <div className="flex items-center gap-3 w-full md:w-auto">
-                  <a
-                    href={`/baca/${lastRead.nomorSurah}#verse-${lastRead.nomorAyat}`}
+                  <Link
+                    to={
+                      lastRead.type === "juz"
+                        ? `/juz/${lastRead.juz}#verse-${lastRead.nomorSurah}-${lastRead.nomorAyat}`
+                        : `/baca/${lastRead.nomorSurah}#verse-${lastRead.nomorAyat}`
+                    }
                     className="flex-1 md:flex-none inline-flex items-center justify-center px-6 py-2.5 bg-white text-emerald-800 rounded-xl font-bold text-sm hover:bg-emerald-50 transition-all duration-200 shadow-md active:scale-95"
                   >
                     <History className="w-4 h-4 mr-2" strokeWidth={2.5} />
                     Lanjutkan Membaca
-                  </a>
+                  </Link>
                   <button
                     onClick={() => setShowDeleteConfirm(true)}
                     className="flex-none p-2.5 bg-white/10 hover:bg-red-500/20 border border-white/20 rounded-xl transition-all duration-200 active:scale-95 text-white"

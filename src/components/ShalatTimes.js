@@ -10,9 +10,7 @@ import {
   Sunset,
   Loader2,
   ChevronDown,
-  Settings2,
   Navigation,
-  Check,
   AlertCircle,
 } from "lucide-react";
 
