@@ -12,6 +12,7 @@ import {
   HelpCircle,
   Sparkles,
   HandHeart,
+  Compass,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import SEO from "@/components/SEO";
@@ -216,8 +217,8 @@ export default function SurahList() {
             </div>
           </div>
 
-          {/* Action Buttons - 4 Columns Grid */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 w-full animate-fade-in delay-100">
+          {/* Action Buttons - 5 Columns Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 w-full animate-fade-in delay-100">
             <button
               onClick={() => {
                 setViewBookmark(!viewBookmark);
@@ -252,6 +253,16 @@ export default function SurahList() {
               <HandHeart className="w-5 h-5 group-hover:scale-110 transition-transform text-emerald-500" />
               <span className="text-xs sm:text-base hidden sm:inline">
                 Doa Harian
+              </span>
+            </Link>
+
+            <Link
+              to="/qiblat"
+              className="flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
+            >
+              <Compass className="w-5 h-5 group-hover:rotate-12 transition-transform text-emerald-500" />
+              <span className="text-xs sm:text-base hidden sm:inline">
+                Arah Qiblat
               </span>
             </Link>
 
