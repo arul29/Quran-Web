@@ -14,7 +14,9 @@ import {
   Navigation,
   Check,
   AlertCircle,
+  Compass,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function PrayerTimes() {
   const [timings, setTimings] = useState(null);
@@ -545,10 +547,20 @@ export default function PrayerTimes() {
         })}
       </div>
 
-      <div className="mt-8 pt-6 border-t border-gray-100 dark:border-slate-700 flex flex-col items-center gap-2">
-        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">
+      <div className="mt-8 pt-6 border-t border-gray-100 dark:border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest order-2 sm:order-1">
           Sumber Data: equran.id (Bimas Islam Kemenag RI)
         </p>
+        <Link
+          to="/qiblat"
+          className="w-full sm:w-auto order-1 sm:order-2 flex items-center justify-center gap-2 px-5 py-3 sm:py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-2xl font-bold text-sm transition-all shadow-lg shadow-emerald-500/20 active:scale-95 group"
+        >
+          <Compass
+            size={18}
+            className="group-hover:rotate-12 transition-transform"
+          />
+          <span>Cek Arah Qiblat</span>
+        </Link>
       </div>
     </div>
   );
