@@ -8,11 +8,11 @@ import {
   Moon,
   BookOpen,
   HelpCircle,
-  MousePointer2,
   Lightbulb,
   Compass,
   Sparkles,
   Library,
+  Navigation,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import SEO from "@/components/SEO";
