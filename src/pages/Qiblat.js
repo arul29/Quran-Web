@@ -30,6 +30,7 @@ export default function Qiblat() {
   const [compassSupported, setCompassSupported] = useState(true);
   const [locationName, setLocationName] = useState("");
   const [compassAccuracy, setCompassAccuracy] = useState(null);
+  const [showCalibration, setShowCalibration] = useState(false);
   const compassRef = useRef(null);
   const lastHeadingRef = useRef(0);
   const animationFrameRef = useRef(null);
@@ -180,6 +181,7 @@ export default function Qiblat() {
           window.addEventListener("deviceorientation", handleOrientation, true);
           setCompassSupported(true);
           setCompassStarted(true);
+          setShowCalibration(true);
         } else {
           alert(
             "Izin kompas ditolak. Anda perlu mengizinkan akses sensor untuk menggunakan fitur ini.",
@@ -203,6 +205,7 @@ export default function Qiblat() {
       }
       setCompassSupported(true);
       setCompassStarted(true);
+      setShowCalibration(true);
     } else {
       setCompassSupported(false);
       alert("Perangkat Anda tidak mendukung sensor kompas.");
@@ -571,19 +574,26 @@ export default function Qiblat() {
 
             {/* Info Card */}
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6">
-              <div className="flex gap-3">
-                <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-blue-900 dark:text-blue-300">
-                  <p className="font-semibold mb-2">Tips Penggunaan:</p>
-                  <ul className="list-disc list-inside space-y-1 text-blue-800 dark:text-blue-400">
-                    <li>Pastikan perangkat Anda dalam posisi datar</li>
-                    <li>Jauhkan dari benda magnetik (speaker, magnet)</li>
-                    <li>
-                      Kalibrasi kompas dengan menggerakkan perangkat membentuk
-                      angka 8
-                    </li>
-                    <li>Panah hijau menunjuk arah Ka'bah</li>
-                  </ul>
+              <div className="flex gap-4">
+                <div className="flex-1 space-y-4">
+                  <div className="flex gap-3">
+                    <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" />
+                    <div className="text-sm text-blue-900 dark:text-blue-300">
+                      <p className="font-semibold mb-2">Tips Penggunaan:</p>
+                      <ul className="list-disc list-inside space-y-1 text-blue-800 dark:text-blue-400">
+                        <li>Pastikan perangkat Anda dalam posisi datar</li>
+                        <li>Jauhkan dari benda magnetik (speaker, magnet)</li>
+                        <li>Jarum hijau menunjuk arah Ka'bah</li>
+                      </ul>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowCalibration(true)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-blue-600/10 hover:bg-blue-600/20 text-blue-600 dark:text-blue-400 rounded-xl font-bold transition-all text-sm border border-blue-600/20"
+                  >
+                    <Smartphone className="w-4 h-4 animate-bounce" />
+                    Bantuan Kalibrasi Kompas
+                  </button>
                 </div>
               </div>
             </div>
@@ -599,6 +609,89 @@ export default function Qiblat() {
           </div>
         )}
       </div>
+
+      {/* Calibration Guide Modal */}
+      {showCalibration && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+          <div
+            className="absolute inset-0 bg-[#0a2e26]/80 backdrop-blur-sm"
+            onClick={() => setShowCalibration(false)}
+          ></div>
+          <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl p-8 sm:p-10 text-center animate-scale-in overflow-hidden">
+            {/* Background Pattern */}
+            <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
+              <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/islamic-art.png')]"></div>
+            </div>
+
+            <div className="relative space-y-8">
+              <div className="space-y-2">
+                <h3 className="text-2xl font-black text-gray-900 dark:text-white">
+                  Kalibrasi Kompas
+                </h3>
+                <p className="text-gray-500 dark:text-gray-400">
+                  Gerakkan ponsel Anda seperti pada animasi di bawah ini
+                </p>
+              </div>
+
+              {/* Infinity Animation Container */}
+              <div className="relative h-48 flex items-center justify-center">
+                <div className="absolute w-32 h-16 border-4 border-dashed border-emerald-500/20 rounded-full rotate-[-45deg] translate-x-[-20px]"></div>
+                <div className="absolute w-32 h-16 border-4 border-dashed border-emerald-500/20 rounded-full rotate-[45deg] translate-x-[20px]"></div>
+
+                <div className="calibration-animation relative z-10 p-4 bg-emerald-500 rounded-2xl shadow-xl shadow-emerald-500/30">
+                  <Smartphone className="w-12 h-12 text-white" />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-slate-800 p-4 rounded-2xl">
+                  Lakukan gerakan angka 8 (∞) di udara beberapa kali hingga
+                  kompas terasa lebih akurat.
+                </p>
+                <button
+                  onClick={() => setShowCalibration(false)}
+                  className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
+                >
+                  Selesai Kalibrasi
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Animations */}
+      <style>{`
+        @keyframes infinity-loop {
+          0% {
+            transform: translate(-40px, 0) rotate(-30deg);
+          }
+          25% {
+            transform: translate(0, -20px) rotate(0deg);
+          }
+          50% {
+            transform: translate(40px, 0) rotate(30deg);
+          }
+          75% {
+            transform: translate(0, 20px) rotate(0deg);
+          }
+          100% {
+            transform: translate(-40px, 0) rotate(-30deg);
+          }
+        }
+        
+        .calibration-animation {
+          animation: infinity-loop 3s ease-in-out infinite;
+        }
+
+        @keyframes scale-in {
+          from { opacity: 0; transform: scale(0.95); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        .animate-scale-in {
+          animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+      `}</style>
     </div>
   );
 }
