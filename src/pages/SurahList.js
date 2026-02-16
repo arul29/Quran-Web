@@ -255,7 +255,6 @@ export default function SurahList() {
                 Doa Harian
               </span>
             </Link>
-
             <Link
               to="/qiblat"
               className="flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
