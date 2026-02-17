@@ -242,6 +242,209 @@ export default function Qiblat() {
     return qiblatDirection - deviceHeading;
   };
 
+  const underConstruction = true;
+
+  if (underConstruction)
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300">
+        <SEO
+          title="Arah Qiblat - Kompas Digital (Segera Hadir)"
+          description="Fitur kompas digital untuk menemukan arah qiblat sedang dalam pengembangan. Segera hadir dengan akurasi tinggi dan UI yang intuitif."
+        />
+
+        {/* Decorative Background */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
+          <div
+            className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"
+            style={{ animationDelay: "1s" }}
+          ></div>
+        </div>
+
+        {/* Header */}
+        <div className="relative overflow-hidden bg-gradient-to-br from-[#0a2e26] via-emerald-900 to-[#0a2e26] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pt-20 pb-24 sm:py-32 px-4 sm:px-6">
+          <div className="absolute inset-0 opacity-10 pointer-events-none">
+            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/islamic-art.png')]"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-950/50 to-[#0a2e26] dark:to-slate-950"></div>
+          </div>
+
+          <div className="relative max-w-4xl mx-auto">
+            <Link
+              to="/"
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-2xl backdrop-blur-md text-white transition-all active:scale-95 group border border-white/10 mb-8"
+            >
+              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+              <span className="font-bold">Kembali</span>
+            </Link>
+
+            <div className="text-center space-y-6">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 rounded-full border border-amber-500/30 text-amber-300 text-xs font-black uppercase tracking-[0.2em]">
+                <Loader2 className="w-3 h-3 animate-spin" />
+                Dalam Pengembangan
+              </div>
+
+              <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-[1.1]">
+                Arah <span className="text-emerald-400">Qiblat</span>
+              </h1>
+
+              <p className="text-xl text-emerald-100/80 max-w-2xl mx-auto leading-relaxed">
+                Kami sedang menyempurnakan kompas digital agar lebih akurat dan
+                responsif untuk membantu Anda menemukan arah kiblat dengan mudah
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12">
+          {/* Animated Compass Preview */}
+          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-12 border border-gray-100 dark:border-slate-800 mb-8">
+            <div className="flex flex-col items-center space-y-8">
+              {/* Compass Animation */}
+              <div className="relative w-48 h-48">
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 to-blue-100 dark:from-emerald-900/30 dark:to-blue-900/30 rounded-full"></div>
+                <div className="absolute inset-4 border-4 border-emerald-200 dark:border-emerald-700/50 rounded-full"></div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Compass
+                    className="w-24 h-24 text-emerald-600 dark:text-emerald-400 animate-spin"
+                    style={{ animationDuration: "8s" }}
+                  />
+                </div>
+                <div className="absolute top-2 left-1/2 -translate-x-1/2">
+                  <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
+                    U
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-center space-y-3">
+                <h2 className="text-2xl font-black text-gray-900 dark:text-white">
+                  Segera Hadir! 🚀
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 max-w-md">
+                  Kompas digital dengan akurasi tinggi dan responsivitas yang
+                  cepat sedang dalam tahap pengujian akhir
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid sm:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-slate-800 hover:shadow-xl transition-all">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
+                  <Navigation className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    Akurasi Tinggi
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Perhitungan arah kiblat yang presisi menggunakan sensor
+                    kompas digital
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-slate-800 hover:shadow-xl transition-all">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                  <MapPin className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    Deteksi Lokasi Otomatis
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Menampilkan jarak ke Ka'bah dan arah kiblat dari posisi Anda
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-slate-800 hover:shadow-xl transition-all">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
+                  <Smartphone className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    Responsif & Cepat
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Update real-time tanpa delay untuk pengalaman pengguna yang
+                    lebih baik
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-slate-800 hover:shadow-xl transition-all">
+              <div className="flex items-start gap-4">
+                <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-xl">
+                  <Compass className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                    Kalibrasi Mudah
+                  </h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    Panduan kalibrasi yang intuitif untuk hasil maksimal
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Timeline Info */}
+          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl shadow-xl p-8 mb-8 text-white">
+            <div className="flex flex-col sm:flex-row items-center gap-6">
+              <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
+                <Info className="w-8 h-8" />
+              </div>
+              <div className="flex-1 text-center sm:text-left">
+                <h3 className="text-xl font-black mb-2">Estimasi Peluncuran</h3>
+                <p className="text-emerald-50">
+                  Fitur kompas qiblat akan segera tersedia setelah optimasi dan
+                  pengujian akurasi selesai. Kami sedang memastikan kompas
+                  merespons dengan cepat dan akurat agar Anda tidak salah
+                  kiblat.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="flex flex-col sm:flex-row gap-4 pb-12">
+            <Link
+              to="/"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold shadow-lg shadow-emerald-600/30 transition-all active:scale-95"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Kembali ke Beranda
+            </Link>
+            <Link
+              to="/help"
+              className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-white border border-gray-200 dark:border-slate-700 rounded-2xl font-bold shadow-lg transition-all active:scale-95"
+            >
+              <Info className="w-5 h-5" />
+              Pusat Bantuan
+            </Link>
+          </div>
+        </div>
+
+        {/* Custom Styles */}
+        <style>{`
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+          }
+        `}</style>
+      </div>
+    );
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300">
       <SEO
