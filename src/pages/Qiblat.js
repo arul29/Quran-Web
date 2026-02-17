@@ -33,8 +33,8 @@ export default function Qiblat() {
   const [showCalibration, setShowCalibration] = useState(false);
   const compassRef = useRef(null);
   const lastHeadingRef = useRef(0);
-  const animationFrameRef = useRef(null);
-  const smoothingFactor = 0.15; // Lower = smoother but slower response
+  const lastUpdateTimeRef = useRef(Date.now());
+  const smoothingFactor = 0.3; // Balanced for quick response with smoothness
 
   // Request location permission and get user's coordinates
   const getUserLocation = () => {
@@ -118,7 +118,7 @@ export default function Qiblat() {
     );
   };
 
-  // Smooth heading transition to avoid jumps
+  // Adaptive smooth heading transition to avoid jumps while remaining responsive
   const smoothHeading = (newHeading, lastHeading) => {
     let diff = newHeading - lastHeading;
 
@@ -126,11 +126,29 @@ export default function Qiblat() {
     if (diff > 180) diff -= 360;
     if (diff < -180) diff += 360;
 
-    const smoothed = lastHeading + diff * smoothingFactor;
+    // Adaptive smoothing: fast for large changes, smooth for small ones
+    const absDiff = Math.abs(diff);
+    let dynamicSmoothing;
+
+    if (absDiff > 30) {
+      // Large change - almost instant (user is actively rotating)
+      dynamicSmoothing = 0.8;
+    } else if (absDiff > 10) {
+      // Medium change - balanced
+      dynamicSmoothing = 0.5;
+    } else if (absDiff > 3) {
+      // Small change - responsive
+      dynamicSmoothing = 0.35;
+    } else {
+      // Tiny change - smooth to avoid jitter
+      dynamicSmoothing = 0.2;
+    }
+
+    const smoothed = lastHeading + diff * dynamicSmoothing;
     return (smoothed + 360) % 360;
   };
 
-  // Handle device orientation for compass - REAL-TIME with smoothing
+  // Handle device orientation for compass - REAL-TIME with adaptive smoothing
   const handleOrientation = (event) => {
     let heading = null;
 
@@ -152,17 +170,10 @@ export default function Qiblat() {
     }
 
     if (heading !== null) {
-      // Cancel any pending animation frame
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-
-      // Use requestAnimationFrame for smooth updates
-      animationFrameRef.current = requestAnimationFrame(() => {
-        const smoothedHeading = smoothHeading(heading, lastHeadingRef.current);
-        lastHeadingRef.current = smoothedHeading;
-        setDeviceHeading(smoothedHeading);
-      });
+      // Apply adaptive smoothing and update immediately for better responsiveness
+      const smoothedHeading = smoothHeading(heading, lastHeadingRef.current);
+      lastHeadingRef.current = smoothedHeading;
+      setDeviceHeading(smoothedHeading);
     }
   };
 
@@ -222,9 +233,6 @@ export default function Qiblat() {
         handleOrientation,
         true,
       );
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
     };
   }, []);
 
@@ -414,7 +422,7 @@ export default function Qiblat() {
                     className="absolute inset-0"
                     style={{
                       transform: `rotate(${-deviceHeading}deg)`,
-                      transition: "transform 0.1s linear",
+                      transition: "transform 0.03s ease-out",
                     }}
                   >
                     {/* Cardinal Directions */}
