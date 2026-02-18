@@ -129,11 +129,17 @@ export default function Qiblat() {
 
     const absDiff = Math.abs(diff);
     let factor;
-    if (absDiff > 45) factor = 0.9;
-    else if (absDiff > 15) factor = 0.6;
-    else factor = 0.25;
+    // Lower factors = smoother, Higher = faster
+    if (absDiff > 90)
+      factor = 0.8; // Immediate snap for 180 flips
+    else if (absDiff > 30)
+      factor = 0.4; // Responsive for normal turns
+    else if (absDiff > 1)
+      factor = 0.12; // Very smooth for subtle movements
+    else factor = 0.05; // Almost still for micro-jitters
 
-    return (lastHeading + diff * factor + 360) % 360;
+    const smoothed = lastHeading + diff * factor;
+    return (smoothed + 360) % 360;
   }, []);
 
   // ─── RAF-batched orientation handler ─────────────────────────────────────────
@@ -415,7 +421,13 @@ export default function Qiblat() {
 
               <div className="text-center space-y-6">
                 {/* ── Compass Visual ── */}
-                <div className="relative mx-auto w-full max-w-xs aspect-square select-none">
+                <div
+                  className="relative mx-auto w-full max-w-xs aspect-square select-none"
+                  style={{
+                    transformStyle: "preserve-3d",
+                    backfaceVisibility: "hidden",
+                  }}
+                >
                   {/* Activate button overlay */}
                   {!compassStarted && (
                     <div className="absolute inset-0 z-20 flex items-center justify-center rounded-full">
@@ -438,43 +450,41 @@ export default function Qiblat() {
                   {/* Compass face background */}
                   <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-full shadow-inner" />
 
-                  {/* Degree tick marks */}
-                  <div className="absolute inset-0 rounded-full overflow-hidden">
-                    {Array.from({ length: 72 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="absolute top-0 left-1/2 origin-bottom"
-                        style={{
-                          height: "50%",
-                          width: "1px",
-                          transform: `translateX(-50%) rotate(${i * 5}deg)`,
-                        }}
-                      >
-                        <div
-                          className={
-                            i % 18 === 0
-                              ? "w-[2px] h-4 bg-gray-500 dark:bg-gray-400 mx-auto"
-                              : i % 6 === 0
-                                ? "w-[1.5px] h-2.5 bg-gray-400 dark:bg-gray-500 mx-auto"
-                                : "w-px h-1.5 bg-gray-300 dark:bg-gray-600 mx-auto"
-                          }
-                        />
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Rotating Rose — cardinal directions rotate with device */}
+                  {/* Rotating Rose — cardinal directions and ticks rotate together with device */}
                   <div
                     className="absolute inset-0"
                     style={{
-                      transform: `rotate(${roseRotation}deg)`,
-                      // willChange tells the browser to promote this to its own GPU layer
+                      transform: `rotate(${roseRotation}deg) translate3d(0,0,0)`,
                       willChange: "transform",
-                      transition: compassStarted
-                        ? "transform 0.08s linear"
-                        : "none",
+                      transformStyle: "preserve-3d",
+                      backfaceVisibility: "hidden",
                     }}
                   >
+                    {/* Degree tick marks — now part of the rotating rose */}
+                    <div className="absolute inset-0 rounded-full">
+                      {Array.from({ length: 72 }).map((_, i) => (
+                        <div
+                          key={i}
+                          className="absolute top-0 left-1/2 origin-bottom"
+                          style={{
+                            height: "50%",
+                            width: "1px",
+                            transform: `translateX(-50%) rotate(${i * 5}deg)`,
+                          }}
+                        >
+                          <div
+                            className={
+                              i % 18 === 0
+                                ? "w-[2px] h-3.5 bg-gray-500 dark:bg-gray-400 mx-auto"
+                                : i % 6 === 0
+                                  ? "w-[1.5px] h-2 bg-gray-400 dark:bg-gray-500 mx-auto"
+                                  : "w-px h-1 bg-gray-300 dark:bg-gray-600 mx-auto"
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+
                     {/* Cardinal direction labels */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="relative w-full h-full">
