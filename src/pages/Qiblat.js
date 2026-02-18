@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import {
   Compass,
@@ -31,13 +31,36 @@ export default function Qiblat() {
   const [locationName, setLocationName] = useState("");
   const [compassAccuracy, setCompassAccuracy] = useState(null);
   const [showCalibration, setShowCalibration] = useState(false);
-  const compassRef = useRef(null);
-  const lastHeadingRef = useRef(0);
-  const lastUpdateTimeRef = useRef(Date.now());
-  const smoothingFactor = 0.3; // Balanced for quick response with smoothness
+  const [compassStarted, setCompassStarted] = useState(false);
 
-  // Request location permission and get user's coordinates
-  const getUserLocation = () => {
+  // Refs for heading smoothing — avoid stale closures
+  const lastHeadingRef = useRef(0);
+  const rafRef = useRef(null);
+  const pendingHeadingRef = useRef(null);
+
+  // ─── Fetch location name in background (non-blocking) ───────────────────────
+  const fetchLocationName = useCallback(async (latitude, longitude) => {
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`,
+        { headers: { "Accept-Language": "id" } },
+      );
+      const data = await response.json();
+      const city =
+        data.address?.city ||
+        data.address?.town ||
+        data.address?.village ||
+        data.address?.county ||
+        "Lokasi Anda";
+      const country = data.address?.country || "";
+      setLocationName(`${city}, ${country}`);
+    } catch {
+      setLocationName("Lokasi Anda");
+    }
+  }, []);
+
+  // ─── Get user location ───────────────────────────────────────────────────────
+  const getUserLocation = useCallback(() => {
     setLoading(true);
     setError(null);
 
@@ -48,49 +71,26 @@ export default function Qiblat() {
     }
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      (position) => {
         const { latitude, longitude } = position.coords;
         setUserLocation({ latitude, longitude });
 
-        // Calculate qiblat direction
         const direction = calculateQiblatDirection(latitude, longitude);
         setQiblatDirection(direction);
 
-        // Calculate distance to Ka'bah
         const dist = calculateDistanceToKaaba(latitude, longitude);
         setDistance(dist);
 
-        // Get location name using reverse geocoding
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`,
-            {
-              headers: {
-                "Accept-Language": "id",
-              },
-            },
-          );
-          const data = await response.json();
-          const city =
-            data.address.city ||
-            data.address.town ||
-            data.address.village ||
-            data.address.county ||
-            "Lokasi Anda";
-          const country = data.address.country || "";
-          setLocationName(`${city}, ${country}`);
-        } catch (err) {
-          console.error("Reverse geocoding error:", err);
-          setLocationName("Lokasi Anda");
-        }
-
+        // Show compass immediately — geocoding runs in background
         setLoading(false);
         setPermissionState("granted");
+
+        // Non-blocking reverse geocoding
+        fetchLocationName(latitude, longitude);
       },
       (err) => {
         console.error("Geolocation error:", err);
         let errorMessage = "Tidak dapat mengakses lokasi Anda.";
-
         switch (err.code) {
           case err.PERMISSION_DENIED:
             errorMessage =
@@ -106,86 +106,91 @@ export default function Qiblat() {
           default:
             errorMessage = "Terjadi kesalahan saat mengakses lokasi.";
         }
-
         setError(errorMessage);
         setLoading(false);
       },
       {
         enableHighAccuracy: true,
         timeout: 10000,
-        maximumAge: 0,
+        maximumAge: 30000, // Allow 30s cached position — much faster on re-open
       },
     );
-  };
+  }, [fetchLocationName]);
 
-  // Adaptive smooth heading transition to avoid jumps while remaining responsive
-  const smoothHeading = (newHeading, lastHeading) => {
+  // ─── Adaptive smoothing ──────────────────────────────────────────────────────
+  // Uses exponential moving average with adaptive factor:
+  // - Large jumps (>45°): near-instant (factor 0.9) — user is actively rotating
+  // - Medium (15-45°): fast (0.6)
+  // - Small (<15°): smooth (0.25) — prevents jitter from sensor noise
+  const smoothHeading = useCallback((newHeading, lastHeading) => {
     let diff = newHeading - lastHeading;
-
-    // Handle 360/0 degree crossing
     if (diff > 180) diff -= 360;
     if (diff < -180) diff += 360;
 
-    // Adaptive smoothing: fast for large changes, smooth for small ones
     const absDiff = Math.abs(diff);
-    let dynamicSmoothing;
+    let factor;
+    if (absDiff > 45) factor = 0.9;
+    else if (absDiff > 15) factor = 0.6;
+    else factor = 0.25;
 
-    if (absDiff > 30) {
-      // Large change - almost instant (user is actively rotating)
-      dynamicSmoothing = 0.8;
-    } else if (absDiff > 10) {
-      // Medium change - balanced
-      dynamicSmoothing = 0.5;
-    } else if (absDiff > 3) {
-      // Small change - responsive
-      dynamicSmoothing = 0.35;
-    } else {
-      // Tiny change - smooth to avoid jitter
-      dynamicSmoothing = 0.2;
-    }
+    return (lastHeading + diff * factor + 360) % 360;
+  }, []);
 
-    const smoothed = lastHeading + diff * dynamicSmoothing;
-    return (smoothed + 360) % 360;
-  };
+  // ─── RAF-batched orientation handler ─────────────────────────────────────────
+  // Batches sensor events into requestAnimationFrame to avoid excessive re-renders
+  // while keeping the compass perfectly in sync with the display refresh rate.
+  const handleOrientation = useCallback(
+    (event) => {
+      let heading = null;
 
-  // Handle device orientation for compass - REAL-TIME with adaptive smoothing
-  const handleOrientation = (event) => {
-    let heading = null;
-
-    if (event.webkitCompassHeading !== undefined) {
-      // iOS Safari - provides true heading
-      heading = event.webkitCompassHeading;
-
-      // Get accuracy if available
-      if (
-        event.webkitCompassAccuracy !== undefined &&
-        event.webkitCompassAccuracy >= 0
-      ) {
-        setCompassAccuracy(event.webkitCompassAccuracy);
+      if (event.webkitCompassHeading !== undefined) {
+        // iOS Safari — provides true north heading directly
+        heading = event.webkitCompassHeading;
+        if (
+          event.webkitCompassAccuracy !== undefined &&
+          event.webkitCompassAccuracy >= 0
+        ) {
+          setCompassAccuracy(event.webkitCompassAccuracy);
+        }
+      } else if (event.absolute && event.alpha !== null) {
+        // Android deviceorientationabsolute — true north
+        heading = (360 - event.alpha + 360) % 360;
+      } else if (event.alpha !== null) {
+        // Android deviceorientation — magnetic north (fallback)
+        heading = (360 - event.alpha + 360) % 360;
       }
-    } else if (event.alpha !== null) {
-      // Android Chrome - provides magnetic heading
-      // Alpha gives rotation around z-axis (0-360)
-      heading = 360 - event.alpha;
-    }
 
-    if (heading !== null) {
-      // Apply adaptive smoothing and update immediately for better responsiveness
-      const smoothedHeading = smoothHeading(heading, lastHeadingRef.current);
-      lastHeadingRef.current = smoothedHeading;
-      setDeviceHeading(smoothedHeading);
-    }
-  };
+      if (heading === null) return;
 
-  const [compassStarted, setCompassStarted] = useState(false);
+      // Store latest heading for the next RAF tick
+      pendingHeadingRef.current = heading;
 
-  // Request device orientation permission (REQUIRED to be triggered by user action)
-  const startCompass = async () => {
+      // Schedule a single RAF update if not already scheduled
+      if (rafRef.current === null) {
+        rafRef.current = requestAnimationFrame(() => {
+          rafRef.current = null;
+          if (pendingHeadingRef.current === null) return;
+
+          const smoothed = smoothHeading(
+            pendingHeadingRef.current,
+            lastHeadingRef.current,
+          );
+          lastHeadingRef.current = smoothed;
+          pendingHeadingRef.current = null;
+          setDeviceHeading(smoothed);
+        });
+      }
+    },
+    [smoothHeading],
+  );
+
+  // ─── Start compass ───────────────────────────────────────────────────────────
+  const startCompass = useCallback(async () => {
     if (
       typeof DeviceOrientationEvent !== "undefined" &&
       typeof DeviceOrientationEvent.requestPermission === "function"
     ) {
-      // iOS 13+ logic
+      // iOS 13+ — must be triggered by user gesture
       try {
         const permission = await DeviceOrientationEvent.requestPermission();
         if (permission === "granted") {
@@ -204,7 +209,7 @@ export default function Qiblat() {
         setCompassSupported(false);
       }
     } else if (typeof DeviceOrientationEvent !== "undefined") {
-      // Android and older iOS
+      // Android — prefer absolute (true north) over magnetic
       if ("ondeviceorientationabsolute" in window) {
         window.addEventListener(
           "deviceorientationabsolute",
@@ -221,229 +226,40 @@ export default function Qiblat() {
       setCompassSupported(false);
       alert("Perangkat Anda tidak mendukung sensor kompas.");
     }
-  };
+  }, [handleOrientation]);
 
+  // ─── Init ────────────────────────────────────────────────────────────────────
   useEffect(() => {
     getUserLocation();
-
     return () => {
+      // Cleanup listeners and pending RAF
       window.removeEventListener("deviceorientation", handleOrientation, true);
       window.removeEventListener(
         "deviceorientationabsolute",
         handleOrientation,
         true,
       );
+      if (rafRef.current !== null) {
+        cancelAnimationFrame(rafRef.current);
+      }
     };
-  }, []);
+  }, [getUserLocation, handleOrientation]);
 
-  // Calculate the rotation for the compass needle
-  const getCompassRotation = () => {
-    if (qiblatDirection === null) return 0;
-    return qiblatDirection - deviceHeading;
-  };
+  // ─── Compass needle rotation ─────────────────────────────────────────────────
+  // The rose (background) rotates by -deviceHeading so "U" always points north.
+  // The needle rotates by qiblatDirection within the rose, so it always points to Mecca.
+  const needleRotation = qiblatDirection ?? 0;
+  const roseRotation = -deviceHeading;
 
-  const underConstruction = true;
-
-  if (underConstruction)
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300">
-        <SEO
-          title="Arah Qiblat - Kompas Digital (Segera Hadir)"
-          description="Fitur kompas digital untuk menemukan arah qiblat sedang dalam pengembangan. Segera hadir dengan akurasi tinggi dan UI yang intuitif."
-        />
-
-        {/* Decorative Background */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
-          <div
-            className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"
-            style={{ animationDelay: "1s" }}
-          ></div>
-        </div>
-
-        {/* Header */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-[#0a2e26] via-emerald-900 to-[#0a2e26] dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pt-20 pb-24 sm:py-32 px-4 sm:px-6">
-          <div className="absolute inset-0 opacity-10 pointer-events-none">
-            <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/islamic-art.png')]"></div>
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-emerald-950/50 to-[#0a2e26] dark:to-slate-950"></div>
-          </div>
-
-          <div className="relative max-w-4xl mx-auto">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-2xl backdrop-blur-md text-white transition-all active:scale-95 group border border-white/10 mb-8"
-            >
-              <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-              <span className="font-bold">Kembali</span>
-            </Link>
-
-            <div className="text-center space-y-6">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 rounded-full border border-amber-500/30 text-amber-300 text-xs font-black uppercase tracking-[0.2em]">
-                <Loader2 className="w-3 h-3 animate-spin" />
-                Dalam Pengembangan
-              </div>
-
-              <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white tracking-tight leading-[1.1]">
-                Arah <span className="text-emerald-400">Qiblat</span>
-              </h1>
-
-              <p className="text-xl text-emerald-100/80 max-w-2xl mx-auto leading-relaxed">
-                Kami sedang menyempurnakan kompas digital agar lebih akurat dan
-                responsif untuk membantu Anda menemukan arah kiblat dengan mudah
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12">
-          {/* Animated Compass Preview */}
-          <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-12 border border-gray-100 dark:border-slate-800 mb-8">
-            <div className="flex flex-col items-center space-y-8">
-              {/* Compass Animation */}
-              <div className="relative w-48 h-48">
-                <div className="absolute inset-0 bg-gradient-to-br from-emerald-100 to-blue-100 dark:from-emerald-900/30 dark:to-blue-900/30 rounded-full"></div>
-                <div className="absolute inset-4 border-4 border-emerald-200 dark:border-emerald-700/50 rounded-full"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Compass
-                    className="w-24 h-24 text-emerald-600 dark:text-emerald-400 animate-spin"
-                    style={{ animationDuration: "8s" }}
-                  />
-                </div>
-                <div className="absolute top-2 left-1/2 -translate-x-1/2">
-                  <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
-                    U
-                  </span>
-                </div>
-              </div>
-
-              <div className="text-center space-y-3">
-                <h2 className="text-2xl font-black text-gray-900 dark:text-white">
-                  Segera Hadir! 🚀
-                </h2>
-                <p className="text-gray-600 dark:text-gray-400 max-w-md">
-                  Kompas digital dengan akurasi tinggi dan responsivitas yang
-                  cepat sedang dalam tahap pengujian akhir
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Features Grid */}
-          <div className="grid sm:grid-cols-2 gap-6 mb-8">
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-slate-800 hover:shadow-xl transition-all">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl">
-                  <Navigation className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                    Akurasi Tinggi
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Perhitungan arah kiblat yang presisi menggunakan sensor
-                    kompas digital
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-slate-800 hover:shadow-xl transition-all">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                  <MapPin className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                    Deteksi Lokasi Otomatis
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Menampilkan jarak ke Ka'bah dan arah kiblat dari posisi Anda
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-slate-800 hover:shadow-xl transition-all">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl">
-                  <Smartphone className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                    Responsif & Cepat
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Update real-time tanpa delay untuk pengalaman pengguna yang
-                    lebih baik
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white dark:bg-slate-900 rounded-2xl shadow-lg p-6 border border-gray-100 dark:border-slate-800 hover:shadow-xl transition-all">
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-xl">
-                  <Compass className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-                    Kalibrasi Mudah
-                  </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">
-                    Panduan kalibrasi yang intuitif untuk hasil maksimal
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Timeline Info */}
-          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-3xl shadow-xl p-8 mb-8 text-white">
-            <div className="flex flex-col sm:flex-row items-center gap-6">
-              <div className="p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                <Info className="w-8 h-8" />
-              </div>
-              <div className="flex-1 text-center sm:text-left">
-                <h3 className="text-xl font-black mb-2">Estimasi Peluncuran</h3>
-                <p className="text-emerald-50">
-                  Fitur kompas qiblat akan segera tersedia setelah optimasi dan
-                  pengujian akurasi selesai. Kami sedang memastikan kompas
-                  merespons dengan cepat dan akurat agar Anda tidak salah
-                  kiblat.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 pb-12">
-            <Link
-              to="/"
-              className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold shadow-lg shadow-emerald-600/30 transition-all active:scale-95"
-            >
-              <ArrowLeft className="w-5 h-5" />
-              Kembali ke Beranda
-            </Link>
-            <Link
-              to="/help"
-              className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-white border border-gray-200 dark:border-slate-700 rounded-2xl font-bold shadow-lg transition-all active:scale-95"
-            >
-              <Info className="w-5 h-5" />
-              Pusat Bantuan
-            </Link>
-          </div>
-        </div>
-
-        {/* Custom Styles */}
-        <style>{`
-          @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-          }
-        `}</style>
-      </div>
-    );
+  // ─── Accuracy color ──────────────────────────────────────────────────────────
+  const accuracyColor =
+    compassAccuracy === null
+      ? "text-gray-500"
+      : compassAccuracy <= 10
+        ? "text-emerald-600 dark:text-emerald-400"
+        : compassAccuracy <= 20
+          ? "text-amber-600 dark:text-amber-400"
+          : "text-red-600 dark:text-red-400";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300">
@@ -543,7 +359,7 @@ export default function Qiblat() {
             </div>
           </div>
         ) : (
-          // Success State - Show Compass
+          // Success State — Show Compass
           <div className="space-y-6">
             {/* Location Info Card */}
             <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl p-6 border border-gray-100 dark:border-slate-800">
@@ -556,7 +372,7 @@ export default function Qiblat() {
                     Lokasi Anda
                   </h3>
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    {locationName}
+                    {locationName || "Memuat nama lokasi..."}
                   </p>
                 </div>
               </div>
@@ -590,106 +406,147 @@ export default function Qiblat() {
                   <div className="text-sm text-red-800 dark:text-red-300">
                     <p className="font-bold">Koneksi Tidak Aman (HTTP)</p>
                     <p>
-                      Sensor kompas hanya berfungsi pada koneksi **HTTPS**. Jika
-                      Anda mencoba di HP lewat IP lokal (192.168.x.x), gunakan
-                      **HTTPS** atau tunnel seperti ngrok.
+                      Sensor kompas hanya berfungsi pada koneksi HTTPS. Gunakan
+                      HTTPS atau tunnel seperti ngrok untuk testing lokal.
                     </p>
                   </div>
                 </div>
               )}
 
               <div className="text-center space-y-6">
-                {/* Compass Visual */}
-                <div className="relative mx-auto w-full max-w-sm aspect-square">
+                {/* ── Compass Visual ── */}
+                <div className="relative mx-auto w-full max-w-xs aspect-square select-none">
+                  {/* Activate button overlay */}
                   {!compassStarted && (
-                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/10 dark:bg-slate-900/10 backdrop-blur-[2px] rounded-full">
+                    <div className="absolute inset-0 z-20 flex items-center justify-center rounded-full">
                       <button
                         onClick={startCompass}
-                        className="flex flex-col items-center gap-3 p-8 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-2xl shadow-emerald-600/40 transform transition-all active:scale-95 animate-pulse"
+                        className="flex flex-col items-center gap-3 p-8 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white rounded-full shadow-2xl shadow-emerald-600/40 transition-all active:scale-95"
+                        aria-label="Aktifkan Kompas"
                       >
                         <Compass size={48} />
-                        <span className="font-bold">Aktifkan Kompas</span>
+                        <span className="font-bold text-sm">
+                          Aktifkan Kompas
+                        </span>
                       </button>
                     </div>
                   )}
 
-                  {/* Compass Background */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-slate-800 dark:to-slate-900 rounded-full shadow-inner"></div>
+                  {/* Outer glow ring */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400/20 to-blue-400/20 blur-xl" />
 
-                  {/* Compass Rings */}
-                  <div className="absolute inset-4 border-4 border-gray-200 dark:border-slate-700 rounded-full"></div>
-                  <div className="absolute inset-8 border-2 border-gray-100 dark:border-slate-800 rounded-full"></div>
+                  {/* Compass face background */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-full shadow-inner" />
 
-                  {/* Rotating Rose Container - This makes U always point North */}
+                  {/* Degree tick marks */}
+                  <div className="absolute inset-0 rounded-full overflow-hidden">
+                    {Array.from({ length: 72 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="absolute top-0 left-1/2 origin-bottom"
+                        style={{
+                          height: "50%",
+                          width: "1px",
+                          transform: `translateX(-50%) rotate(${i * 5}deg)`,
+                        }}
+                      >
+                        <div
+                          className={
+                            i % 18 === 0
+                              ? "w-[2px] h-4 bg-gray-500 dark:bg-gray-400 mx-auto"
+                              : i % 6 === 0
+                                ? "w-[1.5px] h-2.5 bg-gray-400 dark:bg-gray-500 mx-auto"
+                                : "w-px h-1.5 bg-gray-300 dark:bg-gray-600 mx-auto"
+                          }
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Rotating Rose — cardinal directions rotate with device */}
                   <div
                     className="absolute inset-0"
                     style={{
-                      transform: `rotate(${-deviceHeading}deg)`,
-                      transition: "transform 0.03s ease-out",
+                      transform: `rotate(${roseRotation}deg)`,
+                      // willChange tells the browser to promote this to its own GPU layer
+                      willChange: "transform",
+                      transition: compassStarted
+                        ? "transform 0.08s linear"
+                        : "none",
                     }}
                   >
-                    {/* Cardinal Directions */}
+                    {/* Cardinal direction labels */}
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="relative w-full h-full">
                         {/* North */}
-                        <div className="absolute top-2 left-1/2 -translate-x-1/2">
-                          <span className="text-lg font-black text-red-600 dark:text-red-400">
+                        <div className="absolute top-3 left-1/2 -translate-x-1/2">
+                          <span className="text-base font-black text-red-500 dark:text-red-400">
                             U
                           </span>
                         </div>
                         {/* East */}
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2">
-                          <span className="text-sm font-bold text-gray-600 dark:text-gray-400">
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                          <span className="text-sm font-bold text-gray-500 dark:text-gray-400">
                             T
                           </span>
                         </div>
                         {/* South */}
-                        <div className="absolute bottom-2 left-1/2 -translate-x-1/2">
-                          <span className="text-sm font-bold text-gray-600 dark:text-gray-400">
+                        <div className="absolute bottom-3 left-1/2 -translate-x-1/2">
+                          <span className="text-sm font-bold text-gray-500 dark:text-gray-400">
                             S
                           </span>
                         </div>
                         {/* West */}
-                        <div className="absolute left-2 top-1/2 -translate-y-1/2">
-                          <span className="text-sm font-bold text-gray-600 dark:text-gray-400">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2">
+                          <span className="text-sm font-bold text-gray-500 dark:text-gray-400">
                             B
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Qiblat Needle - Fixed angle relative to the Rose */}
+                    {/* Qiblat Needle — fixed angle relative to rose = always points to Mecca */}
                     <div
                       className="absolute inset-0 flex items-center justify-center"
                       style={{
-                        transform: `rotate(${qiblatDirection}deg)`,
+                        transform: `rotate(${needleRotation}deg)`,
+                        willChange: "transform",
                       }}
                     >
-                      <div className="relative">
-                        {/* Needle pointing to Qiblat */}
-                        <div className="w-2.5 h-36 bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-full shadow-lg relative -top-18">
-                          <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[14px] border-l-transparent border-r-[14px] border-r-transparent border-b-[24px] border-b-emerald-400"></div>
-                        </div>
-                        {/* Needle pointing opposite */}
-                        <div className="w-2 h-36 bg-gradient-to-b from-gray-400 to-gray-200 opacity-20 rounded-full relative -top-36"></div>
+                      {/* Needle shaft + arrowhead */}
+                      <div
+                        className="relative flex flex-col items-center"
+                        style={{ marginTop: "-40%" }}
+                      >
+                        {/* Arrowhead */}
+                        <div className="w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[18px] border-b-emerald-500" />
+                        {/* Shaft */}
+                        <div className="w-2.5 h-28 bg-gradient-to-b from-emerald-500 to-emerald-700 rounded-b-full shadow-lg shadow-emerald-500/40" />
                       </div>
                     </div>
 
-                    {/* Ka'bah Icon Layer */}
+                    {/* Ka'bah icon at needle tip */}
                     <div
-                      className="absolute top-1/2 left-1/2 -translate-x-1/2"
+                      className="absolute inset-0 flex items-start justify-center"
                       style={{
-                        transform: `translate(-50%, -50%) rotate(${qiblatDirection}deg) translateY(-145px)`,
+                        transform: `rotate(${needleRotation}deg)`,
+                        willChange: "transform",
                       }}
                     >
-                      <div className="w-10 h-10 bg-emerald-600 dark:bg-emerald-500 rounded-lg flex items-center justify-center shadow-xl">
-                        <span className="text-white text-2xl">🕋</span>
+                      <div
+                        className="w-9 h-9 bg-emerald-600 dark:bg-emerald-500 rounded-xl flex items-center justify-center shadow-xl shadow-emerald-600/40 mt-2"
+                        title="Ka'bah"
+                      >
+                        <span className="text-xl leading-none">🕋</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* Center Dot - Stays fixed in the middle */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-white dark:bg-slate-900 border-4 border-emerald-600 rounded-full shadow-lg z-10"></div>
+                  {/* Inner ring decoration */}
+                  <div className="absolute inset-8 border border-gray-200/60 dark:border-slate-700/60 rounded-full pointer-events-none" />
+
+                  {/* Center pivot dot */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-5 h-5 bg-white dark:bg-slate-900 border-[3px] border-emerald-500 rounded-full shadow-lg z-10" />
                 </div>
 
                 {/* Direction Info */}
@@ -733,8 +590,9 @@ export default function Qiblat() {
                     </div>
                   </div>
 
+                  {/* Device heading + accuracy */}
                   {compassStarted && compassSupported && (
-                    <div className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-4 animate-fade-in">
+                    <div className="bg-gray-50 dark:bg-slate-800 rounded-2xl p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <Smartphone className="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -751,18 +609,31 @@ export default function Qiblat() {
                           </p>
                         </div>
                       </div>
-                      {compassAccuracy !== null && compassAccuracy > 0 && (
-                        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-slate-700">
-                          <p className="text-xs text-gray-500 dark:text-gray-400">
+                      {compassAccuracy !== null && compassAccuracy >= 0 && (
+                        <div className="mt-2 pt-2 border-t border-gray-200 dark:border-slate-700 flex items-center justify-between">
+                          <p className={`text-xs font-medium ${accuracyColor}`}>
                             Akurasi: ±{compassAccuracy.toFixed(0)}°
-                            {compassAccuracy > 20 && " (Perlu kalibrasi)"}
+                            {compassAccuracy > 20 && (
+                              <span className="ml-1 text-red-500">
+                                — Perlu kalibrasi
+                              </span>
+                            )}
                           </p>
+                          {compassAccuracy > 20 && (
+                            <button
+                              onClick={() => setShowCalibration(true)}
+                              className="text-xs text-blue-600 dark:text-blue-400 font-semibold underline"
+                            >
+                              Kalibrasi
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>
                   )}
                 </div>
 
+                {/* No compass support fallback */}
                 {!compassSupported && (
                   <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl p-4">
                     <div className="flex gap-3">
@@ -783,7 +654,7 @@ export default function Qiblat() {
               </div>
             </div>
 
-            {/* Info Card */}
+            {/* Tips Card */}
             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-2xl p-6">
               <div className="flex gap-4">
                 <div className="flex-1 space-y-4">
@@ -795,6 +666,10 @@ export default function Qiblat() {
                         <li>Pastikan perangkat Anda dalam posisi datar</li>
                         <li>Jauhkan dari benda magnetik (speaker, magnet)</li>
                         <li>Jarum hijau menunjuk arah Ka'bah</li>
+                        <li>
+                          Kalibrasi dengan gerakan angka 8 (∞) di udara jika
+                          kompas terasa tidak akurat
+                        </li>
                       </ul>
                     </div>
                   </div>
@@ -827,7 +702,7 @@ export default function Qiblat() {
           <div
             className="absolute inset-0 bg-[#0a2e26]/80 backdrop-blur-sm"
             onClick={() => setShowCalibration(false)}
-          ></div>
+          />
           <div className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl p-8 sm:p-10 text-center animate-scale-in overflow-hidden">
             {/* Background Pattern */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
@@ -844,11 +719,10 @@ export default function Qiblat() {
                 </p>
               </div>
 
-              {/* Infinity Animation Container */}
+              {/* Infinity Animation */}
               <div className="relative h-48 flex items-center justify-center">
                 <div className="absolute w-32 h-16 border-4 border-dashed border-emerald-500/20 rounded-full rotate-[-45deg] translate-x-[-20px]"></div>
                 <div className="absolute w-32 h-16 border-4 border-dashed border-emerald-500/20 rounded-full rotate-[45deg] translate-x-[20px]"></div>
-
                 <div className="calibration-animation relative z-10 p-4 bg-emerald-500 rounded-2xl shadow-xl shadow-emerald-500/30">
                   <Smartphone className="w-12 h-12 text-white" />
                 </div>
@@ -874,30 +748,18 @@ export default function Qiblat() {
       {/* Custom Animations */}
       <style>{`
         @keyframes infinity-loop {
-          0% {
-            transform: translate(-40px, 0) rotate(-30deg);
-          }
-          25% {
-            transform: translate(0, -20px) rotate(0deg);
-          }
-          50% {
-            transform: translate(40px, 0) rotate(30deg);
-          }
-          75% {
-            transform: translate(0, 20px) rotate(0deg);
-          }
-          100% {
-            transform: translate(-40px, 0) rotate(-30deg);
-          }
+          0%   { transform: translate(-40px, 0) rotate(-30deg); }
+          25%  { transform: translate(0, -20px) rotate(0deg); }
+          50%  { transform: translate(40px, 0) rotate(30deg); }
+          75%  { transform: translate(0, 20px) rotate(0deg); }
+          100% { transform: translate(-40px, 0) rotate(-30deg); }
         }
-        
         .calibration-animation {
           animation: infinity-loop 3s ease-in-out infinite;
         }
-
         @keyframes scale-in {
           from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
+          to   { opacity: 1; transform: scale(1); }
         }
         .animate-scale-in {
           animation: scale-in 0.3s cubic-bezier(0.16, 1, 0.3, 1);
