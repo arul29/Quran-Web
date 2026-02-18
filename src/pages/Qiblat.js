@@ -561,9 +561,9 @@ export default function Qiblat() {
 
                 {/* Direction Info */}
                 <div className="space-y-4">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-full">
-                    <Navigation className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-                    <span className="text-sm font-bold text-emerald-900 dark:text-emerald-300">
+                  <div className="flex items-center justify-center gap-1.5 px-3 py-2.5 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl">
+                    <Navigation className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    <span className="text-[11px] sm:text-xs font-bold text-emerald-900 dark:text-emerald-300 whitespace-nowrap">
                       {!compassStarted
                         ? "Klik tombol di tengah untuk mulai"
                         : "Arahkan perangkat ke arah panah hijau"}
