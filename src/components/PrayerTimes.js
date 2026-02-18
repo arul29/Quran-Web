@@ -94,8 +94,13 @@ export default function PrayerTimes() {
         const data = res.data.data;
         // Today's Date Logic
         const today = new Date();
-        const ramadhanStart = new Date("2026-02-18"); // Approx start for 1447H
-        const diffTime = today - ramadhanStart;
+        today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate day calculation
+
+        // Hasil Sidang Isbat 2026: 1 Ramadhan 1447H pada 19 Februari 2026
+        const ramadhanStart = new Date("2026-02-19");
+        ramadhanStart.setHours(0, 0, 0, 0);
+
+        const diffTime = today.getTime() - ramadhanStart.getTime();
         const diffDays = Math.max(
           0,
           Math.floor(diffTime / (1000 * 60 * 60 * 24)),

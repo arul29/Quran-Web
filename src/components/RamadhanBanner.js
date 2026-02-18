@@ -25,7 +25,7 @@ export default function RamadhanBanner() {
     fetchDailyVerse();
 
     const calculateTimeLeft = () => {
-      const ramadhanDate = new Date("February 18, 2026 00:00:00").getTime();
+      const ramadhanDate = new Date("February 19, 2026 00:00:00").getTime();
       const now = new Date().getTime();
       const difference = ramadhanDate - now;
 
