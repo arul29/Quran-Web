@@ -251,12 +251,36 @@ export default function JuzRead() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Loader className="w-12 h-12 text-emerald-600 dark:text-emerald-400 animate-spin mx-auto" />
-          <p className="text-gray-600 dark:text-gray-400 font-medium">
-            Memuat Juz {juzNumber}...
-          </p>
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pt-20">
+        <div className="max-w-4xl mx-auto px-4 space-y-6 animate-pulse">
+          <div className="bg-gradient-to-r from-emerald-600/20 to-teal-800/20 rounded-3xl p-8 border border-emerald-500/20">
+            <div className="h-8 bg-gray-200 dark:bg-slate-700 rounded w-1/4 mb-4"></div>
+            <div className="space-y-3">
+              <div className="h-5 bg-gray-200 dark:bg-slate-700 rounded w-full"></div>
+              <div className="h-5 bg-gray-200 dark:bg-slate-700 rounded w-3/4"></div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-gray-100 dark:border-slate-700"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-gray-200 dark:bg-slate-700 rounded-full"></div>
+                    <div className="w-32 h-5 bg-gray-200 dark:bg-slate-700 rounded"></div>
+                  </div>
+                  <div className="flex gap-2">
+                    <div className="w-9 h-9 bg-gray-200 dark:bg-slate-700 rounded-xl"></div>
+                    <div className="w-9 h-9 bg-gray-200 dark:bg-slate-700 rounded-xl"></div>
+                  </div>
+                </div>
+                <div className="h-20 bg-gray-200 dark:bg-slate-700 rounded-xl w-full mb-4"></div>
+                <div className="h-5 bg-gray-200 dark:bg-slate-700 rounded w-full"></div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );

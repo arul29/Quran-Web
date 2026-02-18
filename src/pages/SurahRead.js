@@ -489,13 +489,21 @@ export default function SurahRead() {
               {Array.from({ length: 5 }).map((_, index) => (
                 <div
                   key={index}
-                  className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 border border-gray-100 dark:border-slate-700"
+                  className="bg-white dark:bg-slate-800 rounded-2xl shadow-sm p-6 sm:p-8 border border-gray-100 dark:border-slate-700"
                 >
-                  <div className="w-12 h-12 bg-gray-200 dark:bg-slate-700 rounded-full mb-4"></div>
-                  <div className="h-7 bg-gray-200 dark:bg-slate-700 rounded w-5/6 mr-auto mb-4"></div>
-                  <div className="h-5 bg-gray-200 dark:bg-slate-700 rounded w-full mb-2"></div>
-                  <div className="flex justify-end mt-4 border-t border-gray-100 dark:border-slate-700 pt-4">
-                    <div className="h-10 w-32 bg-gray-200 dark:bg-slate-700 rounded-full"></div>
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="w-12 h-12 bg-gray-200 dark:bg-slate-700 rounded-full"></div>
+                  </div>
+                  <div className="flex flex-col items-end mb-6">
+                    <div className="h-10 bg-gray-200 dark:bg-slate-700 rounded w-3/4 mb-3"></div>
+                  </div>
+                  <div className="space-y-3 mb-6">
+                    <div className="h-5 bg-gray-200 dark:bg-slate-700 rounded w-full"></div>
+                    <div className="h-5 bg-gray-200 dark:bg-slate-700 rounded w-1/2"></div>
+                  </div>
+                  <div className="flex justify-end gap-3 pt-4 border-t border-gray-100 dark:border-slate-700">
+                    <div className="h-10 w-24 bg-gray-200 dark:bg-slate-700 rounded-full"></div>
+                    <div className="h-10 w-24 bg-gray-200 dark:bg-slate-700 rounded-full"></div>
                   </div>
                 </div>
               ))}

@@ -142,12 +142,24 @@ export default function DoaRead() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <Loader className="w-12 h-12 text-emerald-600 dark:text-emerald-400 animate-spin mx-auto" />
-          <p className="text-gray-600 dark:text-gray-400 font-medium">
-            Memuat Doa...
-          </p>
+      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 pt-20">
+        <div className="max-w-4xl mx-auto px-4 space-y-6 animate-pulse">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-gray-100 dark:border-slate-700">
+            <div className="w-20 h-6 bg-gray-200 dark:bg-slate-700 rounded-lg mb-3"></div>
+            <div className="h-8 bg-gray-200 dark:bg-slate-700 rounded w-2/3 mb-4"></div>
+            <div className="flex gap-2">
+              <div className="w-16 h-7 bg-gray-200 dark:bg-slate-700 rounded-lg"></div>
+              <div className="w-16 h-7 bg-gray-200 dark:bg-slate-700 rounded-lg"></div>
+            </div>
+          </div>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-8 border border-gray-100 dark:border-slate-700">
+            <div className="h-6 bg-gray-200 dark:bg-slate-700 rounded w-32 mb-6"></div>
+            <div className="h-24 bg-gray-200 dark:bg-slate-700 rounded w-full mx-auto"></div>
+          </div>
+          <div className="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-gray-100 dark:border-slate-700">
+            <div className="h-6 bg-gray-200 dark:bg-slate-700 rounded w-32 mb-4"></div>
+            <div className="h-10 bg-gray-200 dark:bg-slate-700 rounded w-full"></div>
+          </div>
         </div>
       </div>
     );
