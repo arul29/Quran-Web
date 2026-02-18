@@ -9,6 +9,7 @@ import DoaRead from "@/pages/DoaRead";
 import SmartSearch from "@/pages/SmartSearch";
 import Help from "@/pages/Help";
 import Qiblat from "@/pages/Qiblat";
+import NotFound from "@/pages/NotFound";
 
 export default function RoutesContainer() {
   return (
@@ -23,6 +24,7 @@ export default function RoutesContainer() {
         <Route path="/tanya-ai" element={<SmartSearch />} />
         <Route path="/bantuan" element={<Help />} />
         <Route path="/qiblat" element={<Qiblat />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Footer />
     </>
