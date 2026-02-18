@@ -1,87 +1,255 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowLeft, Home, Search, AlertCircle } from "lucide-react";
+import {
+  Home,
+  Search,
+  BookOpen,
+  Compass,
+  Library,
+  ArrowLeft,
+  HandHeart,
+} from "lucide-react";
 import SEO from "@/components/SEO";
 
+const quickLinks = [
+  {
+    to: "/",
+    icon: BookOpen,
+    label: "Al-Qur'an",
+    desc: "Baca surah",
+    color: "from-emerald-500 to-teal-600",
+    shadow: "shadow-emerald-500/30",
+  },
+  {
+    to: "/juz",
+    icon: Library,
+    label: "Per Juz",
+    desc: "30 Juz",
+    color: "from-blue-500 to-indigo-600",
+    shadow: "shadow-blue-500/30",
+  },
+  {
+    to: "/qiblat",
+    icon: Compass,
+    label: "Qiblat",
+    desc: "Arah kiblat",
+    color: "from-amber-500 to-orange-600",
+    shadow: "shadow-amber-500/30",
+  },
+  {
+    to: "/doa",
+    icon: HandHeart,
+    label: "Doa",
+    desc: "Kumpulan doa",
+    color: "from-pink-500 to-rose-600",
+    shadow: "shadow-pink-500/30",
+  },
+];
+
 export default function NotFound() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    // Trigger entrance animation after mount
+    const t = setTimeout(() => setMounted(true), 50);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 transition-colors duration-300 flex flex-col justify-center items-center px-4">
+    <div className="relative min-h-screen bg-gradient-to-br from-[#0a2e26] via-emerald-950 to-slate-950 overflow-hidden flex flex-col">
       <SEO
-        title="404 - Halaman Tidak Ditemukan"
+        title="404 – Halaman Tidak Ditemukan"
         description="Maaf, halaman yang Anda cari tidak dapat ditemukan di Quran Web."
       />
 
-      {/* Decorative Background */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl animate-pulse"></div>
+      {/* ── Decorative blobs ── */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute -top-32 -left-32 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[120px] animate-pulse" />
         <div
-          className="absolute bottom-20 right-10 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        ></div>
-        <div className="absolute inset-0 opacity-[0.03] dark:opacity-[0.05]">
-          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/islamic-art.png')]"></div>
-        </div>
+          className="absolute -bottom-40 -right-20 w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[140px] animate-pulse"
+          style={{ animationDelay: "1.5s" }}
+        />
+        <div
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-teal-500/5 rounded-full blur-[100px] animate-pulse"
+          style={{ animationDelay: "0.75s" }}
+        />
+        {/* Islamic art pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.04] bg-[url('https://www.transparenttextures.com/patterns/islamic-art.png')]" />
       </div>
 
-      <div className="relative max-w-md w-full text-center space-y-8 animate-in fade-in zoom-in duration-500">
-        {/* Animated Icon Container */}
-        <div className="relative mx-auto w-32 h-32">
-          <div className="absolute inset-0 bg-emerald-500/20 dark:bg-emerald-500/10 rounded-full animate-ping"></div>
-          <div className="relative flex items-center justify-center w-32 h-32 bg-white dark:bg-slate-900 rounded-full shadow-2xl border-4 border-emerald-500 dark:border-emerald-600">
-            <span className="text-5xl font-black text-emerald-600 dark:text-emerald-400">
-              404
-            </span>
-          </div>
-          <div className="absolute -bottom-2 -right-2 p-3 bg-amber-500 rounded-2xl shadow-lg border-4 border-white dark:border-slate-900">
-            <AlertCircle className="w-6 h-6 text-white" />
+      {/* ── Main content ── */}
+      <div className="relative flex-1 flex flex-col items-center justify-center px-4 py-16">
+        {/* Floating 404 badge */}
+        <div
+          className="transition-all duration-700"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(-24px)",
+          }}
+        >
+          {/* Outer glow ring */}
+          <div className="relative mx-auto mb-10 w-44 h-44 flex items-center justify-center">
+            <div
+              className="absolute inset-0 rounded-full bg-emerald-500/20 animate-ping"
+              style={{ animationDuration: "2.5s" }}
+            />
+            <div
+              className="absolute inset-2 rounded-full bg-emerald-500/10 animate-ping"
+              style={{ animationDuration: "2.5s", animationDelay: "0.4s" }}
+            />
+
+            {/* Circle card */}
+            <div className="relative w-full h-full rounded-full bg-white/5 border border-white/10 backdrop-blur-xl flex flex-col items-center justify-center shadow-2xl shadow-black/40">
+              <span
+                className="text-6xl font-black leading-none"
+                style={{
+                  background: "linear-gradient(135deg, #34d399, #059669)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                404
+              </span>
+              <span className="text-[10px] font-black uppercase tracking-[0.25em] text-emerald-400/70 mt-1">
+                Not Found
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className="space-y-3">
-          <h1 className="text-3xl font-black text-gray-900 dark:text-white sm:text-4xl">
-            Oops! Halaman Hilang
+        {/* Text block */}
+        <div
+          className="text-center max-w-md space-y-4 transition-all duration-700 delay-100"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(20px)",
+          }}
+        >
+          <h1 className="text-4xl sm:text-5xl font-black text-white tracking-tight leading-tight">
+            Halaman <span className="text-emerald-400">Tidak</span> Ditemukan
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400 leading-relaxed">
-            Maaf, sepertinya halaman yang Anda cari telah berpindah ke dunianya
-            sendiri atau tidak pernah ada.
+          <p className="text-emerald-100/50 text-base sm:text-lg leading-relaxed">
+            Sepertinya halaman yang Anda cari sudah berpindah atau tidak pernah
+            ada. Jangan khawatir, kami siap membantu Anda kembali ke jalur yang
+            benar.
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 pt-4">
+        {/* Primary actions */}
+        <div
+          className="mt-10 flex flex-col sm:flex-row gap-3 w-full max-w-sm transition-all duration-700 delay-200"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(20px)",
+          }}
+        >
           <Link
             to="/"
-            className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-bold shadow-lg shadow-emerald-600/30 transition-all active:scale-95 group"
+            className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 bg-emerald-500 hover:bg-emerald-400 text-white rounded-2xl font-bold shadow-xl shadow-emerald-500/30 transition-all active:scale-95 group"
           >
             <Home className="w-5 h-5 group-hover:scale-110 transition-transform" />
             Ke Beranda
           </Link>
-          <Link
-            to="/tanya-ai"
-            className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 text-gray-900 dark:text-white border border-gray-200 dark:border-slate-700 rounded-2xl font-bold shadow-lg shadow-gray-200/20 dark:shadow-none transition-all active:scale-95 group"
+          <button
+            onClick={() => window.history.back()}
+            className="flex-1 inline-flex items-center justify-center gap-2 px-6 py-4 bg-white/10 hover:bg-white/20 text-white border border-white/10 rounded-2xl font-bold backdrop-blur-sm transition-all active:scale-95 group"
           >
-            <Search className="w-5 h-5 group-hover:scale-110 transition-transform" />
-            Cari Sesuatu
-          </Link>
+            <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+            Kembali
+          </button>
         </div>
 
-        {/* Back Button */}
-        <button
-          onClick={() => window.history.back()}
-          className="inline-flex items-center gap-2 text-sm font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors group"
+        {/* Divider */}
+        <div
+          className="mt-12 flex items-center gap-4 w-full max-w-sm transition-all duration-700 delay-300"
+          style={{
+            opacity: mounted ? 1 : 0,
+          }}
         >
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-          Kembali ke sebelumnya
-        </button>
+          <div className="flex-1 h-px bg-white/10" />
+          <span className="text-xs font-bold text-white/30 uppercase tracking-widest">
+            Atau kunjungi
+          </span>
+          <div className="flex-1 h-px bg-white/10" />
+        </div>
+
+        {/* Quick links grid */}
+        <div
+          className="mt-6 grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-sm sm:max-w-xl transition-all duration-700 delay-[400ms]"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(16px)",
+          }}
+        >
+          {quickLinks.map(({ to, icon: Icon, label, desc, color, shadow }) => (
+            <Link
+              key={to}
+              to={to}
+              className={`group flex flex-col items-center gap-2 p-4 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 backdrop-blur-sm transition-all active:scale-95`}
+            >
+              <div
+                className={`p-3 rounded-xl bg-gradient-to-br ${color} shadow-lg ${shadow} group-hover:scale-110 transition-transform`}
+              >
+                <Icon className="w-5 h-5 text-white" />
+              </div>
+              <div className="text-center">
+                <p className="text-xs font-bold text-white">{label}</p>
+                <p className="text-[10px] text-white/40">{desc}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* Search shortcut */}
+        <div
+          className="mt-6 w-full max-w-sm transition-all duration-700 delay-500"
+          style={{
+            opacity: mounted ? 1 : 0,
+            transform: mounted ? "translateY(0)" : "translateY(12px)",
+          }}
+        >
+          <Link
+            to="/tanya-ai"
+            className="flex items-center gap-3 w-full px-5 py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-emerald-500/40 rounded-2xl backdrop-blur-sm transition-all group"
+          >
+            <div className="p-2 bg-emerald-500/20 rounded-xl group-hover:bg-emerald-500/30 transition-colors">
+              <Search className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div className="flex-1 text-left">
+              <p className="text-xs font-bold text-white">Cari dengan AI</p>
+              <p className="text-[10px] text-white/40">
+                Temukan ayat & doa yang Anda butuhkan
+              </p>
+            </div>
+            <div className="text-white/20 group-hover:text-emerald-400 transition-colors text-lg">
+              →
+            </div>
+          </Link>
+        </div>
       </div>
 
-      {/* Quote/Ayat Placeholder - Optional for Aesthetic */}
-      <div className="mt-16 text-center max-w-sm">
-        <p className="text-xs italic text-gray-400 dark:text-gray-600">
+      {/* ── Bottom quote ── */}
+      <div
+        className="relative pb-10 text-center px-4 transition-all duration-700 delay-700"
+        style={{ opacity: mounted ? 1 : 0 }}
+      >
+        <p className="text-[11px] italic text-white/20 max-w-xs mx-auto leading-relaxed">
           "Barangsiapa yang menempuh jalan untuk mencari ilmu, maka Allah akan
-          memudahkan baginya jalan menuju surga." (HR. Muslim)
+          memudahkan baginya jalan menuju surga."
+          <span className="not-italic font-bold text-white/30">
+            {" "}
+            — HR. Muslim
+          </span>
         </p>
       </div>
+
+      {/* Custom entrance animation */}
+      <style>{`
+        @keyframes float-up {
+          from { opacity: 0; transform: translateY(30px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
