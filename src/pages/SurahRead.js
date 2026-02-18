@@ -304,6 +304,17 @@ export default function SurahRead() {
       });
   };
 
+  const copyTafsir = (text, verseNumber) => {
+    const textToCopy = `Tafsir QS. ${surahData.namaLatin} Ayat ${verseNumber}:\n\n${text}`;
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => showToast("Tafsir berhasil disalin!", "success"))
+      .catch((err) => {
+        console.error("Gagal menyalin tafsir:", err);
+        showToast("Gagal menyalin tafsir.", "error");
+      });
+  };
+
   const handleShare = () => {
     setIsShareModalOpen(true);
   };
@@ -679,11 +690,9 @@ export default function SurahRead() {
               <button
                 onClick={() => setIsTafsirOpen(false)}
                 className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                aria-label="Tutup"
               >
-                <ArrowLeft
-                  className="w-6 h-6 rotate-90 text-gray-500"
-                  strokeWidth={2.5}
-                />
+                <X className="w-6 h-6 text-gray-500" strokeWidth={2.5} />
               </button>
             </div>
             <div className="p-6 overflow-y-auto custom-scrollbar bg-slate-50/50 dark:bg-slate-900/50">
@@ -693,12 +702,15 @@ export default function SurahRead() {
                 </p>
               </div>
             </div>
-            <div className="p-6 border-t border-gray-100 dark:border-slate-800 flex justify-end">
+            <div className="p-6 border-t border-gray-100 dark:border-slate-800 flex justify-end gap-3">
               <button
-                onClick={() => setIsTafsirOpen(false)}
-                className="px-8 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 transition-all text-white font-semibold shadow-lg shadow-emerald-600/20 active:scale-95"
+                onClick={() =>
+                  copyTafsir(selectedTafsir.teks, selectedTafsir.nomor)
+                }
+                className="px-8 py-3 rounded-full bg-emerald-600 hover:bg-emerald-700 transition-all text-white font-semibold shadow-lg shadow-emerald-600/20 active:scale-95 flex items-center gap-2"
               >
-                Tutup
+                <Copy size={20} />
+                Salin
               </button>
             </div>
           </div>
