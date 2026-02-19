@@ -194,7 +194,7 @@ export default function SurahList() {
               ) : (
                 <Bookmark className="w-5 h-5 group-hover:scale-110 transition-transform text-emerald-500" />
               )}
-              <span className="text-xs sm:text-base hidden sm:inline">
+              <span className="text-xs sm:text-sm font-medium">
                 {viewBookmark ? "Semua Surah" : "Bookmark"}
               </span>
             </button>
@@ -204,7 +204,7 @@ export default function SurahList() {
               className="flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
             >
               <BookOpen className="w-5 h-5 group-hover:scale-110 transition-transform text-emerald-500" />
-              <span className="text-xs sm:text-base hidden sm:inline">
+              <span className="text-xs sm:text-sm font-medium">
                 Baca per Juz
               </span>
             </Link>
@@ -214,9 +214,7 @@ export default function SurahList() {
               className="flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
             >
               <HandHeart className="w-5 h-5 group-hover:scale-110 transition-transform text-emerald-500" />
-              <span className="text-xs sm:text-base hidden sm:inline">
-                Doa Harian
-              </span>
+              <span className="text-xs sm:text-sm font-medium">Doa Harian</span>
             </Link>
 
             <Link
@@ -224,9 +222,7 @@ export default function SurahList() {
               className="flex items-center justify-center gap-2 sm:gap-3 px-3 sm:px-6 py-4 rounded-2xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800 hover:border-emerald-500/30 hover:shadow-lg transition-all duration-300 dark:text-gray-200 font-bold group"
             >
               <HelpCircle className="w-5 h-5 group-hover:rotate-12 transition-transform text-emerald-500" />
-              <span className="text-xs sm:text-base hidden sm:inline">
-                Bantuan
-              </span>
+              <span className="text-xs sm:text-sm font-medium">Bantuan</span>
             </Link>
           </div>
         </div>
@@ -322,9 +318,9 @@ export default function SurahList() {
               </p>
             </div>
           ) : (
-            surahList.map((item, index) => (
+            surahList.map((item) => (
               <div
-                key={index}
+                key={item.nomor}
                 className="group bg-white dark:bg-slate-800 rounded-2xl shadow-sm hover:shadow-xl dark:hover:shadow-emerald-900/10 transition-all duration-300 overflow-hidden border border-gray-100 dark:border-slate-700 hover:border-emerald-200 dark:hover:border-emerald-800"
               >
                 <div className="p-6">
