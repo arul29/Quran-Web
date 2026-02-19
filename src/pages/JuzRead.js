@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+
 import { useParams, Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
@@ -25,18 +26,20 @@ export default function JuzRead() {
   const [verses, setVerses] = useState([]);
   const [juzInfo, setJuzInfo] = useState(null);
   const [playingVerse, setPlayingVerse] = useState(null);
-  const [audioElement, setAudioElement] = useState(null);
+  const audioRef = useRef(null);
   const [shareModalOpen, setShareModalOpen] = useState(false);
+
   const [shareData, setShareData] = useState(null);
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
-    window.scrollTo(0, 0); // Reset scroll position to top
+    window.scrollTo(0, 0);
     loadJuzData();
     return () => {
-      if (audioElement) {
-        audioElement.pause();
-        audioElement.src = "";
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current = null;
       }
     };
   }, [juzNumber]);
@@ -91,14 +94,14 @@ export default function JuzRead() {
   };
 
   const playAudio = (audioUrl, verseKey) => {
-    if (audioElement) {
-      audioElement.pause();
+    if (audioRef.current) {
+      audioRef.current.pause();
     }
 
     const audio = new Audio(audioUrl);
     audio.play();
     setPlayingVerse(verseKey);
-    setAudioElement(audio);
+    audioRef.current = audio;
 
     audio.onended = () => {
       setPlayingVerse(null);
@@ -106,8 +109,8 @@ export default function JuzRead() {
   };
 
   const stopAudio = () => {
-    if (audioElement) {
-      audioElement.pause();
+    if (audioRef.current) {
+      audioRef.current.pause();
       setPlayingVerse(null);
     }
   };
