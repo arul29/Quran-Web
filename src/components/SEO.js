@@ -14,7 +14,7 @@ const SEO = ({
   const domain = "https://quran.darul.id";
   const fullTitle = title ? `${title} - ${siteName}` : siteName;
   const currentUrl = ogUrl || window.location.href;
-  const logoUrl = "https://cdn-icons-png.flaticon.com/512/2230/2230267.png";
+  const logoUrl = `${domain}/icon-quran.png`;
 
   return (
     <Helmet>

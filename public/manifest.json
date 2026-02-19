@@ -1,25 +1,30 @@
 {
-  "short_name": "Al-Quran Indonesia",
+  "short_name": "Al-Quran",
   "name": "Al-Qur'an Indonesia",
+  "description": "Baca Al-Qur'an Online Lengkap 30 Juz dengan terjemahan, audio, dan tafsir resmi.",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2230/2230267.png",
+      "src": "%PUBLIC_URL%/icon-quran.png",
       "sizes": "64x64 32x32 24x24 16x16",
-      "type": "image/x-icon"
+      "type": "image/png"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2230/2230267.png",
+      "src": "%PUBLIC_URL%/icon-quran.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any maskable"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/2230/2230267.png",
+      "src": "%PUBLIC_URL%/icon-quran.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "orientation": "portrait",
+  "theme_color": "#059669",
+  "background_color": "#ffffff",
+  "categories": ["education", "lifestyle", "religion"]
 }
