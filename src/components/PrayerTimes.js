@@ -94,21 +94,43 @@ export default function PrayerTimes() {
         const data = res.data.data;
         // Today's Date Logic
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Reset time to midnight for accurate day calculation
 
-        // Hasil Sidang Isbat 2026: 1 Ramadhan 1447H pada 19 Februari 2026
-        const ramadhanStart = new Date("2026-02-19");
-        ramadhanStart.setHours(0, 0, 0, 0);
-
-        const diffTime = today.getTime() - ramadhanStart.getTime();
-        const diffDays = Math.max(
-          0,
-          Math.floor(diffTime / (1000 * 60 * 60 * 24)),
+        // Get Hijri info dynamically
+        const hijriFormatter = new Intl.DateTimeFormat(
+          "en-u-ca-islamic-umalqura",
+          {
+            day: "numeric",
+            month: "numeric",
+            year: "numeric",
+          },
         );
 
-        // Ensure index is within 0-29
-        const dayIndex = Math.min(29, diffDays);
+        // --- HIJRI ADJUSTMENT FOR INDONESIA ---
+        // Kalender Umalqura seringkali 1 hari lebih cepat dari Kemenag RI.
+        // Kita kurangi 1 hari untuk sinkronisasi dengan Hilal Indonesia.
+        const adjustedDate = new Date(today);
+        adjustedDate.setDate(today.getDate() - 1);
+
+        const parts = hijriFormatter.formatToParts(adjustedDate);
+        const getPart = (type) => parts.find((p) => p.type === type)?.value;
+
+        const hDay = getPart("day");
+        const hMonth = getPart("month");
+        const hYear = getPart("year");
+
+        const isRamadhan = hMonth === "9";
+        const hijriDay = parseInt(hDay);
+        const hijriYear = hYear;
+
+        // Jika hari ini (setelah dikoreksi) adalah Ramadhan, maka index = hijriDay - 1
+        // Contoh: 1 Ramadhan -> index 0
+        const dayIndex = isRamadhan ? Math.min(29, hijriDay - 1) : 0;
         const schedule = data.imsakiyah[dayIndex];
+
+        const hMonthName = new Intl.DateTimeFormat(
+          "id-ID-u-ca-islamic-umalqura",
+          { month: "long" },
+        ).format(adjustedDate);
 
         setTimings(schedule);
         setDateInfo({
@@ -118,7 +140,7 @@ export default function PrayerTimes() {
             month: "long",
             year: "numeric",
           }),
-          hijri: `${dayIndex + 1} Ramadhan 1447 H`,
+          hijri: `${hDay} ${hMonthName} ${hijriYear} H`,
         });
         setLocation({ provinsi: data.provinsi, kabkota: data.kabkota });
         localStorage.setItem(

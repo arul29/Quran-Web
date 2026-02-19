@@ -125,18 +125,13 @@ export default function SurahList() {
   const isRamadhan = () => {
     try {
       const today = new Date();
-      // Hasil Sidang Isbat 2026: 1 Ramadhan 1447H pada 19 Februari 2026
-      const startRamadhan = new Date("2026-02-19");
-      const endRamadhan = new Date("2026-03-21"); // Perkiraan 30 hari + Idul Fitri
+      // Koreksi -1 hari untuk standar Indonesia
+      const adjustedDate = new Date(today);
+      adjustedDate.setDate(today.getDate() - 1);
 
-      if (today >= startRamadhan && today <= endRamadhan) {
-        return true;
-      }
-
-      // Fallback ke Intl Hijri jika di luar rentang 2026 ini (untuk masa depan)
       const hijriMonth = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", {
         month: "numeric",
-      }).format(today);
+      }).format(adjustedDate);
       return hijriMonth === "9";
     } catch (e) {
       return false;
