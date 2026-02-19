@@ -4,18 +4,18 @@
   "description": "Baca Al-Qur'an Online Lengkap 30 Juz dengan terjemahan, audio, dan tafsir resmi.",
   "icons": [
     {
-      "src": "%PUBLIC_URL%/icon-quran.png",
+      "src": "icon-quran.png",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/png"
     },
     {
-      "src": "%PUBLIC_URL%/icon-quran.png",
+      "src": "icon-quran.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "%PUBLIC_URL%/icon-quran.png",
+      "src": "icon-quran.png",
       "type": "image/png",
       "sizes": "512x512",
       "purpose": "any maskable"
