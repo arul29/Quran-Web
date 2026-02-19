@@ -22,6 +22,7 @@ import SEO from "@/components/SEO";
 import ThemeToggle from "@/components/ThemeToggle";
 import Toast from "@/components/Toast";
 import ShareModal from "@/components/ShareModal";
+import useBookmark from "@/hooks/useBookmark";
 
 export default function SurahRead() {
   const { no } = useParams();
@@ -31,7 +32,7 @@ export default function SurahRead() {
   const [surahRead, setSurahRead] = useState([]);
   const [playingVerseId, setPlayingVerseId] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [bookmark, setBookmark] = useState([]);
+  const { isBookmark, addBookmark, removeBookmark } = useBookmark();
 
   // State untuk Toast
   const [toast, setToast] = useState(null);
@@ -94,35 +95,6 @@ export default function SurahRead() {
     }
   }, [no]);
 
-  const getBookmark = () => {
-    const bookmark = localStorage.getItem("bookmark");
-    if (bookmark) {
-      setBookmark(JSON.parse(bookmark));
-    } else {
-      setBookmark([]);
-    }
-  };
-
-  const addBookmark = (item) => {
-    const oldBookmark = localStorage.getItem("bookmark");
-    let newBookmark = oldBookmark ? JSON.parse(oldBookmark) : [];
-    localStorage.setItem("bookmark", JSON.stringify(newBookmark.concat(item)));
-    getBookmark();
-  };
-
-  const removeBookmark = (item_id) => {
-    let newBookmark = bookmark.filter((obj) => obj.nomor !== item_id);
-    localStorage.setItem("bookmark", JSON.stringify(newBookmark));
-    getBookmark();
-  };
-
-  const isBookmark = (item_id) => {
-    return (
-      bookmark.filter((bookmarkItem) => item_id === bookmarkItem.nomor).length >
-      0
-    );
-  };
-
   const saveLastRead = (nomorAyat) => {
     const lastReadData = {
       nomorSurah: no,
@@ -139,7 +111,6 @@ export default function SurahRead() {
   };
 
   useEffect(() => {
-    getBookmark();
     getSurahData();
 
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -214,13 +185,14 @@ export default function SurahRead() {
     if (isBookmark(surahData.nomor)) {
       removeBookmark(surahData.nomor);
     } else {
+      // Struktur seragam dengan SurahList.js
       addBookmark({
         nomor: surahData.nomor,
-        nama_latin: surahData.namaLatin,
+        nama: surahData.nama,
+        namaLatin: surahData.namaLatin,
+        jumlahAyat: surahData.jumlahAyat,
+        tempatTurun: surahData.tempatTurun,
         arti: surahData.arti,
-        jumlah_ayat: surahData.jumlahAyat,
-        tempat_turun: surahData.tempatTurun,
-        link: `/baca/${surahData.nomor}`,
       });
     }
   };

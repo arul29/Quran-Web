@@ -20,12 +20,18 @@ import ThemeToggle from "@/components/ThemeToggle";
 import RamadhanBanner from "@/components/RamadhanBanner";
 import PrayerTimes from "@/components/PrayerTimes";
 import ShalatTimes from "@/components/ShalatTimes";
+import useBookmark from "@/hooks/useBookmark";
 
 export default function SurahList() {
   const [loading, setLoading] = useState(false);
   const [surahList, setSurahList] = useState([]);
   const [surahAll, setSurahAll] = useState([]);
-  const [bookmark, setBookmark] = useState([]);
+  const {
+    bookmarks: bookmark,
+    addBookmark,
+    removeBookmark,
+    isBookmark,
+  } = useBookmark();
   const [viewBookmark, setViewBookmark] = useState(false);
   const [lastRead, setLastRead] = useState(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -56,52 +62,6 @@ export default function SurahList() {
     setSurahList(updatedList);
   };
 
-  const getBookmark = () => {
-    const bookmark = localStorage.getItem("bookmark");
-    if (bookmark) {
-      setBookmark(JSON.parse(bookmark));
-    } else {
-      setBookmark([]);
-      console.log("No Bookmark");
-    }
-  };
-
-  const addBookmark = (item) => {
-    const oldBookmark = localStorage.getItem("bookmark");
-    let newBookmark;
-    if (oldBookmark == null) {
-      newBookmark = [];
-    } else {
-      newBookmark = JSON.parse(oldBookmark);
-    }
-    localStorage.setItem(
-      "bookmark",
-      JSON.stringify(
-        newBookmark.concat({
-          nomor: item.nomor,
-          nama: item.nama,
-          namaLatin: item.namaLatin,
-          jumlahAyat: item.jumlahAyat,
-          tempatTurun: item.tempatTurun,
-          arti: item.arti,
-        }),
-      ),
-    );
-    getBookmark();
-  };
-
-  const removeBookmark = (item_id) => {
-    let newBookmark = bookmark.filter(function (obj) {
-      return obj.nomor !== item_id;
-    });
-    localStorage.setItem("bookmark", JSON.stringify(newBookmark));
-    getBookmark();
-  };
-
-  const isBookmark = (item_id) => {
-    return bookmark.filter((bookmark) => item_id === bookmark.nomor).length > 0;
-  };
-
   const getLastRead = () => {
     const data = localStorage.getItem("lastRead");
     if (data) {
@@ -116,7 +76,6 @@ export default function SurahList() {
   };
 
   useEffect(() => {
-    getBookmark();
     getSurahList();
     getLastRead();
   }, []);
