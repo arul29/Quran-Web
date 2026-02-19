@@ -6,6 +6,7 @@ import { BrowserRouter } from "react-router-dom";
 import * as serviceWorkerRegistration from "@/serviceWorkerRegistration";
 import ReactDOM from "react-dom/client";
 import { HelmetProvider } from "react-helmet-async";
+import "@/firebase"; // Inisialisasi Firebase Analytics (hanya aktif di production)
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
