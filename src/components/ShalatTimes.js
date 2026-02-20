@@ -215,8 +215,20 @@ export default function ShalatTimes() {
 
       if (navigator.geolocation) {
         setDetecting(true);
+        // Tambahkan timeout 10 detik agar loading tidak stuck selamanya
+        const geoTimeout = setTimeout(async () => {
+          setDetecting(false);
+          const fallback = {
+            provinsi: "DKI Jakarta",
+            kabkota: "Kota Jakarta Pusat",
+          };
+          await fetchCities(fallback.provinsi);
+          await fetchShalat(fallback.provinsi, fallback.kabkota);
+        }, 10000);
+
         navigator.geolocation.getCurrentPosition(
           async (pos) => {
+            clearTimeout(geoTimeout);
             try {
               const res = await axios.get(
                 `https://nominatim.openstreetmap.org/reverse?format=json&lat=${pos.coords.latitude}&lon=${pos.coords.longitude}`,
@@ -253,6 +265,7 @@ export default function ShalatTimes() {
             }
           },
           async () => {
+            clearTimeout(geoTimeout);
             setDetecting(false);
             const fallback = {
               provinsi: "DKI Jakarta",
@@ -261,6 +274,7 @@ export default function ShalatTimes() {
             await fetchCities(fallback.provinsi);
             await fetchShalat(fallback.provinsi, fallback.kabkota);
           },
+          { timeout: 10000 }, // Browser timeout juga 10 detik
         );
       } else {
         // Geolocation not supported

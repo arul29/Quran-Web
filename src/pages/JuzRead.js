@@ -60,34 +60,34 @@ export default function JuzRead() {
     setJuzInfo(juz);
 
     try {
-      const allVerses = [];
+      // Ambil semua data surah secara paralel (jauh lebih cepat)
+      const promises = juz.daftarSurah.map((surahDalamJuz) =>
+        axios
+          .get(`https://equran.id/api/v2/surat/${surahDalamJuz.nomor}`)
+          .then((res) => {
+            const surahData = res.data.data;
+            return surahData.ayat
+              .filter(
+                (ayat) =>
+                  ayat.nomorAyat >= surahDalamJuz.ayatAwal &&
+                  ayat.nomorAyat <= surahDalamJuz.ayatAkhir,
+              )
+              .map((ayat) => ({
+                ...ayat,
+                surahNumber: surahData.nomor,
+                surahName: surahData.namaLatin,
+                surahNameArabic: surahData.nama,
+              }));
+          }),
+      );
 
-      for (const surahDalamJuz of juz.daftarSurah) {
-        const response = await axios.get(
-          `https://equran.id/api/v2/surat/${surahDalamJuz.nomor}`,
-        );
-
-        const surahData = response.data.data;
-
-        const filteredVerses = surahData.ayat
-          .filter(
-            (ayat) =>
-              ayat.nomorAyat >= surahDalamJuz.ayatAwal &&
-              ayat.nomorAyat <= surahDalamJuz.ayatAkhir,
-          )
-          .map((ayat) => ({
-            ...ayat,
-            surahNumber: surahData.nomor,
-            surahName: surahData.namaLatin,
-            surahNameArabic: surahData.nama,
-          }));
-
-        allVerses.push(...filteredVerses);
-      }
+      const results = await Promise.all(promises);
+      const allVerses = results.flat();
 
       setVerses(allVerses);
     } catch (error) {
       console.error("Error loading Juz data:", error);
+      showToast("Gagal memuat beberapa data Surah.", "error");
     }
 
     setLoading(false);
